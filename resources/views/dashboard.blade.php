@@ -23,7 +23,11 @@
     $userName = auth()->check() ? (auth()->user()->name ?? 'Hafiz') : 'Hafiz';
 
     $stats = [
+<<<<<<< HEAD
         ['label' => 'Current Balance', 'value' => 'B$0', 'sub' => 'Updated today', 'icon' => ''],
+=======
+        ['label' => 'Current Balance', 'value' => 'B$0', 'sub' => 'Updated today', 'icon' => '💰'],
+>>>>>>> origin/home-page
         ['label' => 'Total Expenses',  'value' => 'B$0', 'sub' => 'This month',    'icon' => '📉'],
         ['label' => 'Available coins', 'value' => '0',   'sub' => 'Keep learning!', 'icon' => '🪙'],
     ];
