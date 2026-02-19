@@ -1,59 +1,168 @@
-<x-layouts::auth>
-    <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
+{{-- resources/views/livewire/pages/auth/login.blade.php --}}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login • BruSave</title>
 
-        <!-- Session Status -->
-        <x-auth-session-status class="text-center" :status="session('status')" />
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-6">
-            @csrf
+    <style>
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+                         "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+        }
+        .bs-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(216, 162, 74, 0.20);
+            border-color: rgba(216, 162, 74, 0.65) !important;
+        }
+    </style>
+</head>
 
-            <!-- Email Address -->
-            <flux:input
-                name="email"
-                :label="__('Email address')"
-                :value="old('email')"
-                type="email"
-                required
-                autofocus
-                autocomplete="email"
-                placeholder="email@example.com"
-            />
+<body class="min-h-screen text-slate-900" style="background:#F6F1E6;">
+<main class="relative min-h-screen flex items-center justify-center px-6 py-10 overflow-hidden">
 
-            <!-- Password -->
-            <div class="relative">
-                <flux:input
-                    name="password"
-                    :label="__('Password')"
-                    type="password"
-                    required
-                    autocomplete="current-password"
-                    :placeholder="__('Password')"
-                    viewable
-                />
+    {{-- Cozy glow --}}
+    <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-[320px] w-[640px] rounded-full blur-3xl opacity-20"
+         style="background:#D8A24A;"></div>
+    <div class="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-[260px] w-[520px] rounded-full blur-3xl opacity-16"
+         style="background:#2F5D46;"></div>
 
-                @if (Route::has('password.request'))
-                    <flux:link class="absolute top-0 text-sm end-0" :href="route('password.request')" wire:navigate>
-                        {{ __('Forgot your password?') }}
-                    </flux:link>
+    <div class="w-full max-w-md">
+        {{-- Header --}}
+        <div class="text-center">
+            <img src="{{ asset('images/brusave-logo.png') }}"
+                 alt="BruSave logo"
+                 class="mx-auto h-14 w-auto object-contain">
+
+            <div class="mt-3 text-4xl font-extrabold leading-tight" style="color:#2F5D46;">
+                Bru<i>Save</i>
+            </div>
+
+            <div class="mt-1 text-sm font-semibold" style="color:#D8A24A; opacity:0.95;">
+                Build Wealth, Build Your Town
+            </div>
+
+            <div class="mx-auto mt-4 h-1 w-16 rounded-full"
+                 style="background: rgba(216,162,74,0.85);"></div>
+        </div>
+
+        {{-- Card (outer) --}}
+        <section class="mt-8 rounded-3xl border shadow-lg"
+                 style="background:#FFFBF2; border-color: rgba(47,93,70,0.16);">
+
+            {{-- Card (inner padding wrapper) --}}
+            <div class="p-6 sm:p-8">
+                <h1 class="text-3xl font-extrabold tracking-tight" style="color:#2F5D46;">
+                    Login
+                </h1>
+                <p class="mt-2 text-sm" style="color: rgba(47,93,70,0.78);">
+                    Welcome back. Let’s continue building your town.
+                </p>
+
+                {{-- Session status --}}
+                @if (session('status'))
+                    <div class="mt-5 rounded-2xl border px-4 py-3 text-sm"
+                         style="border-color: rgba(47,93,70,0.16); background: rgba(47,93,70,0.06); color:#2F5D46;">
+                        {{ session('status') }}
+                    </div>
                 @endif
-            </div>
 
-            <!-- Remember Me -->
-            <flux:checkbox name="remember" :label="__('Remember me')" :checked="old('remember')" />
+                {{-- Errors --}}
+                @if ($errors->any())
+                    <div class="mt-5 rounded-2xl border px-4 py-3 text-sm"
+                         style="border-color: rgba(180,60,60,0.30); background: rgba(180,60,60,0.08); color: rgba(120,30,30,0.95);">
+                        <div class="font-semibold">Please fix the following:</div>
+                        <ul class="mt-2 list-disc pl-5 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-            <div class="flex items-center justify-end">
-                <flux:button variant="primary" type="submit" class="w-full" data-test="login-button">
-                    {{ __('Log in') }}
-                </flux:button>
-            </div>
-        </form>
+                <form method="POST" action="{{ route('login') }}" class="mt-6 space-y-5">
+                    @csrf
 
-        @if (Route::has('register'))
-            <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-zinc-600 dark:text-zinc-400">
-                <span>{{ __('Don\'t have an account?') }}</span>
-                <flux:link :href="route('register')" wire:navigate>{{ __('Sign up') }}</flux:link>
+                    <div>
+                        <label class="block text-sm font-semibold" style="color:#2F5D46;">Email</label>
+                        <input
+                            type="email"
+                            name="email"
+                            value="{{ old('email') }}"
+                            required
+                            autofocus
+                            autocomplete="username"
+                            class="bs-input mt-2 w-full rounded-2xl border px-4 py-3"
+                            style="background:#FFFFFF; border-color: rgba(47,93,70,0.18);"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold" style="color:#2F5D46;">Password</label>
+                        <input
+                            type="password"
+                            name="password"
+                            required
+                            autocomplete="current-password"
+                            class="bs-input mt-2 w-full rounded-2xl border px-4 py-3"
+                            style="background:#FFFFFF; border-color: rgba(47,93,70,0.18);"
+                        >
+                    </div>
+
+                    <div class="flex items-center justify-between gap-3">
+                        <label class="inline-flex items-center gap-2 text-sm"
+                               style="color: rgba(47,93,70,0.82);">
+                            <input type="checkbox" name="remember"
+                                   class="rounded border"
+                                   style="border-color: rgba(47,93,70,0.30);">
+                            Remember me
+                        </label>
+
+                        @if (Route::has('password.request'))
+                            <a href="{{ route('password.request') }}"
+                               class="text-sm font-semibold underline underline-offset-4"
+                               style="color:#D8A24A;">
+                                Forgot?
+                            </a>
+                        @endif
+                    </div>
+
+                    {{-- Button area --}}
+                    <div class="pt-2 flex flex-col items-center">
+                        <button
+                            type="submit"
+                            class="w-full md:w-auto md:min-w-[280px] inline-flex items-center justify-center px-8 py-3 rounded-2xl font-semibold transition hover:opacity-90"
+                            style="background:#2F5D46; color:#D8A24A;"
+                        >
+                            Login
+                        </button>
+
+                        <div class="mt-4 text-sm" style="color: rgba(47,93,70,0.78);">
+                            New here?
+                            <a href="{{ route('register') }}"
+                               class="font-semibold underline underline-offset-4"
+                               style="color:#D8A24A;">
+                                Register
+                            </a>
+                        </div>
+
+                        <a href="/"
+                           class="mt-2 text-xs underline underline-offset-4"
+                           style="color: rgba(47,93,70,0.70);">
+                            ← Back to Welcome
+                        </a>
+                    </div>
+                </form>
             </div>
-        @endif
+        </section>
+
+        <footer class="mt-8 text-center text-xs" style="color: rgba(47,93,70,0.75);">
+            © {{ date('Y') }} Bru<i>Save</i>
+        </footer>
     </div>
-</x-layouts::auth>
+</main>
+</body>
+</html>

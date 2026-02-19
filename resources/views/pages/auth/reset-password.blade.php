@@ -1,52 +1,143 @@
-<x-layouts::auth>
-    <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Reset password')" :description="__('Please enter your new password below')" />
+{{-- resources/views/pages/auth/reset-password.blade.php --}}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reset Password • BruSave</title>
 
-        <!-- Session Status -->
-        <x-auth-session-status class="text-center" :status="session('status')" />
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        <form method="POST" action="{{ route('password.update') }}" class="flex flex-col gap-6">
-            @csrf
-            <!-- Token -->
-            <input type="hidden" name="token" value="{{ request()->route('token') }}">
+    <style>
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+                         "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+        }
+        .bs-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(216, 162, 74, 0.20);
+            border-color: rgba(216, 162, 74, 0.65) !important;
+        }
+    </style>
+</head>
 
-            <!-- Email Address -->
-            <flux:input
-                name="email"
-                value="{{ request('email') }}"
-                :label="__('Email')"
-                type="email"
-                required
-                autocomplete="email"
-            />
+<body class="min-h-screen text-slate-900" style="background:#F6F1E6;">
+@php
+    // Fortify reset page receives token in the route: /reset-password/{token}
+    $tokenValue = request()->route('token') ?? ($token ?? '');
+    $emailValue = old('email', request('email') ?? ($request->email ?? ''));
+@endphp
 
-            <!-- Password -->
-            <flux:input
-                name="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Password')"
-                viewable
-            />
+<main class="relative min-h-screen flex items-center justify-center px-6 py-10 overflow-hidden">
 
-            <!-- Confirm Password -->
-            <flux:input
-                name="password_confirmation"
-                :label="__('Confirm password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Confirm password')"
-                viewable
-            />
+    <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-[320px] w-[640px] rounded-full blur-3xl opacity-20"
+         style="background:#D8A24A;"></div>
+    <div class="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-[260px] w-[520px] rounded-full blur-3xl opacity-16"
+         style="background:#2F5D46;"></div>
 
-            <div class="flex items-center justify-end">
-                <flux:button type="submit" variant="primary" class="w-full" data-test="reset-password-button">
-                    {{ __('Reset password') }}
-                </flux:button>
+    <div class="w-full max-w-md">
+        <div class="text-center">
+            <img src="{{ asset('images/brusave-logo.png') }}" alt="BruSave logo"
+                 class="mx-auto h-14 w-auto object-contain">
+
+            <div class="mt-3 text-4xl font-extrabold leading-tight" style="color:#2F5D46;">
+                Bru<i>Save</i>
             </div>
-        </form>
+
+            <div class="mt-1 text-sm font-semibold" style="color:#D8A24A; opacity:0.95;">
+                Build Wealth, Build Your Town
+            </div>
+
+            <div class="mx-auto mt-4 h-1 w-16 rounded-full"
+                 style="background: rgba(216,162,74,0.85);"></div>
+        </div>
+
+        <section class="mt-8 rounded-3xl border shadow-lg"
+                 style="background:#FFFBF2; border-color: rgba(47,93,70,0.16);">
+            <div class="p-6 sm:p-8">
+                <h1 class="text-3xl font-extrabold tracking-tight" style="color:#2F5D46;">
+                    Reset password
+                </h1>
+                <p class="mt-2 text-sm" style="color: rgba(47,93,70,0.78);">
+                    Choose a new password to continue your cozy mission.
+                </p>
+
+                @if ($errors->any())
+                    <div class="mt-5 rounded-2xl border px-4 py-3 text-sm"
+                         style="border-color: rgba(180,60,60,0.30); background: rgba(180,60,60,0.08); color: rgba(120,30,30,0.95);">
+                        <div class="font-semibold">Please fix the following:</div>
+                        <ul class="mt-2 list-disc pl-5 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                {{-- ✅ Fortify uses password.update --}}
+                <form method="POST" action="{{ route('password.update') }}" class="mt-6 space-y-5">
+                    @csrf
+
+                    <input type="hidden" name="token" value="{{ $tokenValue }}">
+
+                    <div>
+                        <label class="block text-sm font-semibold" style="color:#2F5D46;">Email</label>
+                        <input
+                            type="email"
+                            name="email"
+                            value="{{ $emailValue }}"
+                            required
+                            autocomplete="username"
+                            class="bs-input mt-2 w-full rounded-2xl border px-4 py-3"
+                            style="background:#FFFFFF; border-color: rgba(47,93,70,0.18);"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold" style="color:#2F5D46;">New Password</label>
+                        <input
+                            type="password"
+                            name="password"
+                            required
+                            autocomplete="new-password"
+                            class="bs-input mt-2 w-full rounded-2xl border px-4 py-3"
+                            style="background:#FFFFFF; border-color: rgba(47,93,70,0.18);"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold" style="color:#2F5D46;">Confirm Password</label>
+                        <input
+                            type="password"
+                            name="password_confirmation"
+                            required
+                            autocomplete="new-password"
+                            class="bs-input mt-2 w-full rounded-2xl border px-4 py-3"
+                            style="background:#FFFFFF; border-color: rgba(47,93,70,0.18);"
+                        >
+                    </div>
+
+                    <div class="pt-2 flex flex-col items-center">
+                        <button type="submit"
+                                class="w-full md:w-auto md:min-w-[280px] inline-flex items-center justify-center px-8 py-3 rounded-2xl font-semibold transition hover:opacity-90"
+                                style="background:#2F5D46; color:#D8A24A;">
+                            Reset password
+                        </button>
+
+                        <a href="{{ route('login') }}"
+                           class="mt-4 text-sm font-semibold underline underline-offset-4"
+                           style="color:#D8A24A;">
+                            ← Back to Login
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <footer class="mt-8 text-center text-xs" style="color: rgba(47,93,70,0.75);">
+            © {{ date('Y') }} Bru<i>Save</i>
+        </footer>
     </div>
-</x-layouts::auth>
+</main>
+</body>
+</html>
