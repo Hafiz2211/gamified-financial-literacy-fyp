@@ -1,4 +1,3 @@
-{{-- resources/views/dashboard.blade.php --}}
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,86 +7,134 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    {{-- Necessary: ensure emojis render on Windows/Edge too --}}
     <style>
         body {
             font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
                          "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .app-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 270px;
+            height: 100vh;
+            flex-shrink: 0;
+            background: #2F5D46;
+            border-right: 1px solid rgba(47,93,70,0.22);
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: #F6F1E6;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .level-up-notification {
+            animation: slideIn 0.3s ease-out;
         }
     </style>
 </head>
 
-<body class="min-h-screen text-slate-900" style="background:#F6F1E6;">
+<body class="text-slate-900" style="background:#F6F1E6;">
+{{-- Level Up Notification --}}
+@if(session('level_up'))
+    <div id="levelUpNotification" class="level-up-notification" style="position:fixed; top:20px; right:20px; z-index:9999;">
+        <div style="background:#2F5D46; color:#D8A24A; padding:16px 24px; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.2); border-left:4px solid #D8A24A;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-size:28px;">🎉</span>
+                <div>
+                    <div style="font-weight:800; font-size:18px;">Level Up!</div>
+                    <div style="font-size:14px; color:rgba(255,255,255,0.9);">
+                        You reached Level {{ session('level_up')['new_level'] }}!
+                    </div>
+                </div>
+                <button onclick="this.parentElement.parentElement.parentElement.remove();" style="background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; font-size:18px; margin-left:8px;">✕</button>
+            </div>
+        </div>
+    </div>
+    @php session()->forget('level_up'); @endphp
+@endif
+
 @php
-    // Demo data (swap with DB later)
-    $userName = auth()->check() ? (auth()->user()->name ?? 'Hafiz') : 'Hafiz';
+    $user = auth()->user();
+    $userName = $user->name ?? 'Hafiz';
+    $GREEN = '#2F5D46';
+    $GOLD  = '#D8A24A';
+    $BG    = '#F6F1E6';
+    $CARD  = '#FFFBF2';
+    $active = 'dashboard';
+
+    // Calculate current balance (total income - total expenses)
+    $totalIncome = $user->transactions()->where('type', 'income')->sum('amount');
+    $totalExpense = $user->transactions()->where('type', 'expense')->sum('amount');
+    $currentBalance = $totalIncome - $totalExpense;
+
+    // Monthly expenses
+    $monthlyExpense = $user->transactions()
+        ->where('type', 'expense')
+        ->whereMonth('date', now()->month)
+        ->whereYear('date', now()->year)
+        ->sum('amount');
+
+    // Level calculation (300/400/500/600/700)
+    $currentLevel = $user->level ?? 1;
+    $currentXP = $user->xp ?? 0;
+    $xpNeededForNextLevel = 200 + ($currentLevel * 100);
+    $xpProgress = $xpNeededForNextLevel > 0 ? ($currentXP / $xpNeededForNextLevel) * 100 : 0;
+    $xpDisplay = $currentXP . '/' . $xpNeededForNextLevel . ' XP to Level ' . ($currentLevel + 1);
+
+    // Recent activity (last 5 transactions)
+    $recentTransactions = $user->transactions()->latest()->take(5)->get();
 
     $stats = [
-        ['label' => 'Current Balance', 'value' => 'B$0', 'sub' => 'Updated today', 'icon' => '💰'],
-        ['label' => 'Total Expenses',  'value' => 'B$0', 'sub' => 'This month',    'icon' => '📉'],
-        ['label' => 'Available coins', 'value' => '0',   'sub' => 'Keep learning!', 'icon' => '🪙'],
+        ['label' => 'Current Balance', 'value' => 'B$' . number_format($currentBalance, 2), 'sub' => 'Updated today', 'icon' => '💰'],
+        ['label' => 'Total Expenses',  'value' => 'B$' . number_format($monthlyExpense, 2), 'sub' => 'This month',    'icon' => '📉'],
+        ['label' => 'Available coins', 'value' => $user->coins ?? 0,   'sub' => 'Keep learning!', 'icon' => '🪙'],
     ];
 
-    $level = ['label'=>'Current Level','value'=>'Level 0','progress'=>0,'sub'=>'0% to next level'];
-
-    $recent = [
-        ['title'=>'Completed Module: Budgeting Basics','time'=>'2 hours ago','delta'=>'+50 pts','type'=>'plus'],
-        ['title'=>'Expenses Added: Lunch','time'=>'5 hours ago','delta'=>'-B$12.50','type'=>'minus'],
-        ['title'=>'Quiz Completed: Savings 101','time'=>'Yesterday','delta'=>'+30 pts','type'=>'plus'],
+    $nav = [
+        ['key'=>'dashboard','label'=>'Dashboard','href'=>'/dashboard','icon'=>'🏠'],
+        ['key'=>'learn','label'=>'Learn','href'=>'/learn','icon'=>'📖'],
+        ['key'=>'quiz','label'=>'Quiz','href'=>'/quiz','icon'=>'❓'],
+        ['key'=>'track','label'=>'Track Spending','href'=>'/track-spending','icon'=>'🧾'],
+        ['key'=>'progress','label'=>'Room','href'=>'/progress','icon'=>'🏆'],
+        ['key'=>'town','label'=>'Town','href'=>'/town','icon'=>'🏘️'],
     ];
-
-    $active = 'home';
 @endphp
 
-<div class="min-h-screen flex">
-    {{-- Sidebar (ALWAYS visible) --}}
-    <aside class="w-[270px] h-screen flex flex-col border-r"
-           style="
-                background:#2F5D46;
-                border-color: rgba(47,93,70,0.22);
-           ">
-        <div class="p-5 border-b"
-             style="border-color: rgba(255,255,255,0.12);">
+<div class="app-container">
+    {{-- Sidebar --}}
+    <div class="sidebar">
+        <div class="p-5 border-b" style="border-color: rgba(255,255,255,0.12);">
             <div class="flex items-center gap-3">
-                <img
-                    src="{{ asset('images/brusave-logo.png') }}"
-                    alt="BruSave logo"
-                    class="h-8 w-auto object-contain"
-                >
+                <img src="{{ asset('images/brusave-logo.png') }}" alt="BruSave logo" class="h-8 w-auto object-contain">
                 <div>
-                    <div class="text-xl font-extrabold leading-tight" style="color:#D8A24A;">
-                        Bru<i>Save</i>
-                    </div>
-                    <div class="text-xs" style="color: rgba(216,162,74,0.78);">
-                        Build Wealth, Build Your Town
-                    </div>
+                    <div class="text-xl font-extrabold leading-tight" style="color:{{ $GOLD }};">Bru<i>Save</i></div>
+                    <div class="text-xs" style="color: rgba(216,162,74,0.78);">Build Wealth, Build Your Town</div>
                 </div>
             </div>
         </div>
 
-        @php
-            $nav = [
-                ['key'=>'home','label'=>'Home','href'=>'/dashboard','icon'=>'🏠'],
-                ['key'=>'learn','label'=>'Learn','href'=>'/learn','icon'=>'📖'],
-                ['key'=>'quiz','label'=>'Quiz','href'=>'/quiz','icon'=>'❓'],
-                ['key'=>'track','label'=>'Track Spending','href'=>'/track-spending','icon'=>'🧾'],
-                ['key'=>'progress','label'=>'Progress / Rewards','href'=>'/progress','icon'=>'🏆'],
-                ['key'=>'town','label'=>'Town','href'=>'/town','icon'=>'🏘️'],
-            ];
-        @endphp
-
-        {{-- nav scrolls if needed; logout stays visible --}}
         <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
             @foreach ($nav as $item)
                 @php $isActive = $active === $item['key']; @endphp
-
                 <a href="{{ $item['href'] }}"
                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition hover:opacity-95"
-                   style="
-                        border-color: {{ $isActive ? 'rgba(216,162,74,0.60)' : 'rgba(255,255,255,0.16)' }};
-                        background:  {{ $isActive ? 'rgba(216,162,74,0.14)' : 'rgba(255,255,255,0.04)' }};
-                        color:       {{ $isActive ? '#D8A24A' : 'rgba(255,255,255,0.92)' }};
-                   ">
+                   style="border-color: {{ $isActive ? 'rgba(216,162,74,0.60)' : 'rgba(255,255,255,0.16)' }};
+                          background:  {{ $isActive ? 'rgba(216,162,74,0.14)' : 'rgba(255,255,255,0.04)' }};
+                          color:       {{ $isActive ? $GOLD : 'rgba(255,255,255,0.92)' }};">
                     <span class="text-lg">{{ $item['icon'] }}</span>
                     <span class="font-semibold">{{ $item['label'] }}</span>
                 </a>
@@ -99,50 +146,44 @@
                 @csrf
                 <button type="submit"
                         class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border font-semibold transition hover:opacity-95"
-                        style="
-                            border-color: rgba(255,255,255,0.16);
-                            color: rgba(255,255,255,0.92);
-                            background: rgba(255,255,255,0.04);
-                        ">
+                        style="border-color: rgba(255,255,255,0.16); color: rgba(255,255,255,0.92); background: rgba(255,255,255,0.04);">
                     <span>🚪</span> Logout
                 </button>
             </form>
         </div>
-    </aside>
+    </div>
 
     {{-- Main content --}}
-    <main class="flex-1 h-screen flex flex-col overflow-y-auto">
-        <div class="flex flex-col flex-1 mx-auto max-w-6xl px-6 py-8">
-
+    <div class="main-content">
+        <div style="max-width:1200px; margin:0 auto; padding:32px 24px;">
             {{-- Welcome header --}}
             <section class="rounded-2xl border shadow-lg p-6 md:p-7"
-                     style="border-color: rgba(47,93,70,0.16); background:#FFFBF2;">
-                <h1 class="text-2xl md:text-3xl font-extrabold" style="color:#2F5D46;">
-                    Welcome back, {{ $userName }}
+                     style="border-color: rgba(47,93,70,0.16); background:{{ $CARD }};">
+                <h1 class="text-2xl md:text-3xl font-extrabold" style="color:{{ $GREEN }};">
+                    Welcome back, Mayor {{ $userName }}
                 </h1>
                 <p class="mt-2" style="color: rgba(47,93,70,0.78);">
-                    Track your spending and continue learning to earn more points.
+                    Track your spending and learn to earn coins and XP to unlock and purchase buildings.
                 </p>
 
                 {{-- Stat cards --}}
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     @foreach ($stats as $card)
                         <div class="rounded-2xl border p-5 shadow-sm"
-                             style="border-color: rgba(47,93,70,0.16); background:#FFFBF2;">
+                             style="border-color: rgba(47,93,70,0.16); background:{{ $CARD }};">
                             <div class="flex items-start justify-between gap-4">
                                 <div>
                                     <div class="text-xs font-semibold tracking-wide uppercase"
                                          style="color: rgba(47,93,70,0.65);">
                                         {{ $card['label'] }}
                                     </div>
-                                    <div class="mt-1 text-2xl font-extrabold" style="color:#2F5D46;">
+                                    <div class="mt-1 text-2xl font-extrabold" style="color:{{ $GREEN }};">
                                         {{ $card['value'] }}
                                     </div>
                                     <div class="mt-1 text-xs" style="color: rgba(47,93,70,0.65);">
                                         {{ $card['sub'] }}
                                     </div>
                                 </div>
-
                                 <div class="h-11 w-11 rounded-xl flex items-center justify-center text-xl border"
                                      style="background: rgba(216,162,74,0.20); border-color: rgba(216,162,74,0.40);">
                                     {{ $card['icon'] }}
@@ -151,31 +192,29 @@
                         </div>
                     @endforeach
 
-                    {{-- Level --}}
+                    {{-- Level Card --}}
                     <div class="rounded-2xl border p-5 shadow-sm"
-                         style="border-color: rgba(47,93,70,0.16); background:#FFFBF2;">
+                         style="border-color: rgba(47,93,70,0.16); background:{{ $CARD }};">
                         <div class="flex items-start justify-between gap-4">
                             <div class="min-w-0">
                                 <div class="text-xs font-semibold tracking-wide uppercase"
                                      style="color: rgba(47,93,70,0.65);">
-                                    {{ $level['label'] }}
+                                    Current Level
                                 </div>
-                                <div class="mt-1 text-2xl font-extrabold" style="color:#2F5D46;">
-                                    {{ $level['value'] }}
+                                <div class="mt-1 text-2xl font-extrabold" style="color:{{ $GREEN }};">
+                                    Level {{ $currentLevel }}
                                 </div>
-
                                 <div class="mt-3">
                                     <div class="h-2.5 rounded-full overflow-hidden"
                                          style="background: rgba(47,93,70,0.18);">
                                         <div class="h-full rounded-full"
-                                             style="width: {{ $level['progress'] }}%; background:#D8A24A;"></div>
+                                             style="width: {{ $xpProgress }}%; background:{{ $GOLD }};"></div>
                                     </div>
                                     <div class="mt-2 text-xs" style="color: rgba(47,93,70,0.65);">
-                                        {{ $level['sub'] }}
+                                        {{ $xpDisplay }}
                                     </div>
                                 </div>
                             </div>
-
                             <div class="h-11 w-11 rounded-xl flex items-center justify-center text-xl border"
                                  style="background: rgba(216,162,74,0.20); border-color: rgba(216,162,74,0.40);">
                                 ⭐
@@ -184,40 +223,50 @@
                     </div>
                 </div>
 
-                {{-- Recent activity --}}
+                {{-- Recent Activity --}}
                 <div class="mt-6">
                     <div class="rounded-2xl border p-5 shadow-sm"
-                         style="border-color: rgba(47,93,70,0.16); background:#FFFBF2;">
-                        <h2 class="text-lg font-extrabold" style="color:#D8A24A;">Recent Activity</h2>
+                         style="border-color: rgba(47,93,70,0.16); background:{{ $CARD }};">
+                        <h2 class="text-lg font-extrabold" style="color:{{ $GOLD }};">Recent Activity</h2>
 
                         <div class="mt-4 divide-y" style="divide-color: rgba(47,93,70,0.12);">
-                            @foreach ($recent as $r)
+                            @forelse($recentTransactions as $transaction)
+                                @php
+                                    $isIncome = $transaction->type === 'income';
+                                    $title = $isIncome ? 'Income: ' . $transaction->category : 'Expense: ' . $transaction->category;
+                                    $time = $transaction->created_at->diffForHumans();
+                                    $delta = $isIncome ? '+' : '-';
+                                    $delta .= 'B$' . number_format($transaction->amount, 2);
+                                @endphp
                                 <div class="py-4 flex items-center justify-between gap-4">
                                     <div class="min-w-0">
                                         <div class="font-semibold truncate" style="color: rgba(20,30,25,0.92);">
-                                            {{ $r['title'] }}
+                                            {{ $title }}
                                         </div>
                                         <div class="text-xs mt-1" style="color: rgba(47,93,70,0.65);">
-                                            {{ $r['time'] }}
+                                            {{ $time }}
                                         </div>
                                     </div>
-
                                     <div class="shrink-0 text-sm font-extrabold"
-                                         style="color: {{ $r['type']==='plus' ? '#D8A24A' : 'rgba(180,60,60,0.95)' }};">
-                                        {{ $r['delta'] }}
+                                         style="color: {{ $isIncome ? $GOLD : 'rgba(180,60,60,0.95)' }};">
+                                        {{ $delta }}
                                     </div>
                                 </div>
-                            @endforeach
+                            @empty
+                                <div class="py-4 text-center" style="color: rgba(47,93,70,0.65);">
+                                    No recent activity. Start tracking your spending!
+                                </div>
+                            @endforelse
                         </div>
                     </div>
                 </div>
             </section>
 
-            <footer class="mt-auto text-center text-xs pt-8 pb-2" style="color: rgba(47,93,70,0.75);">
+            <footer class="text-center text-xs pt-8 pb-2" style="color: rgba(47,93,70,0.75);">
                 © {{ date('Y') }} Bru<i>Save</i>
             </footer>
         </div>
-    </main>
+    </div>
 </div>
 </body>
 </html>

@@ -1,0 +1,1 @@
+[22-Feb-2026 09:47:45 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in C:\Users\User\herd\finance-fyp\database\seeders\QuizSeeder.php on line 4

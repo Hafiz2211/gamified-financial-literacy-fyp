@@ -152,7 +152,7 @@
                         <a href="/"
                            class="mt-2 text-xs underline underline-offset-4"
                            style="color: rgba(47,93,70,0.70);">
-                            ← Back to Welcome
+                            ← Back to Welcome page
                         </a>
                     </div>
                 </form>

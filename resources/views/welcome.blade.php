@@ -1,4 +1,3 @@
-{{-- resources/views/welcome.blade.php --}}
 <!doctype html>
 <html lang="en">
 <head>
@@ -12,24 +11,25 @@
         body {
             font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
                          "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+            margin: 0;
+            padding: 0;
         }
     </style>
 </head>
 
 <body class="min-h-screen text-slate-900" style="background:#F6F1E6;">
-    {{-- Cozy theme tokens (matches Learn + Dashboard)
-        Primary green:   #2F5D46
-        Accent gold:     #D8A24A
-        Warm cream bg:   #F6F1E6
-        Cozy card cream: #FFFBF2
-    --}}
+    @php
+        $GREEN = '#2F5D46';
+        $GOLD = '#D8A24A';
+        $CARD = '#FFFBF2';
+    @endphp
 
     <main class="relative min-h-screen flex items-center justify-center px-6 py-10 overflow-hidden">
         {{-- Soft cozy glow behind header --}}
         <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-[320px] w-[640px] rounded-full blur-3xl opacity-20"
-             style="background:#D8A24A;"></div>
+             style="background:{{ $GOLD }};"></div>
         <div class="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-[260px] w-[520px] rounded-full blur-3xl opacity-16"
-             style="background:#2F5D46;"></div>
+             style="background:{{ $GREEN }};"></div>
 
         <div class="w-full max-w-2xl">
             {{-- Logo + Slogan --}}
@@ -40,12 +40,12 @@
                     class="mx-auto h-14 w-auto object-contain"
                 >
 
-                <div class="mt-3 text-4xl font-extrabold leading-tight" style="color:#2F5D46;">
+                <div class="mt-3 text-4xl font-extrabold leading-tight" style="color:{{ $GREEN }};">
                     Bru<i>Save</i>
                 </div>
 
                 <div class="mt-1 text-sm font-semibold"
-                     style="color:#D8A24A; opacity:0.95;">
+                     style="color:{{ $GOLD }}; opacity:0.95;">
                     Build Wealth, Build Your Town
                 </div>
 
@@ -55,7 +55,7 @@
 
             {{-- Hero Rectangle --}}
             <section class="mt-8 rounded-3xl border shadow-lg overflow-hidden"
-                     style="background:#FFFBF2; border-color: rgba(47,93,70,0.16);">
+                     style="background:{{ $CARD }}; border-color: rgba(47,93,70,0.16);">
 
                 {{-- Image Area --}}
                 <div class="border-b overflow-hidden"
@@ -72,30 +72,30 @@
 
                 {{-- Mission Text --}}
                 <div class="p-6 md:p-7">
-                    <h1 class="text-2xl md:text-3xl font-extrabold" style="color:#2F5D46;">
-                        Your cozy mission starts here.
+                    <h1 class="text-2xl md:text-3xl font-extrabold" style="color:{{ $GREEN }};">
+                        Welcome, Mayor. Your Town Awaits.
                     </h1>
 
                     <p class="mt-3 text-base"
                        style="color: rgba(47,93,70,0.85);">
-                        Learn smart money habits, track your spending, and earn rewards — all while building your town step by step.
-                        Designed to feel relatable and beginner-friendly in Brunei.
+                        Learn financial basics, track your spending, and earn coins to unlock and furnish your town.
+                        Every responsible choice helps your town grow stronger.
                     </p>
                 </div>
             </section>
 
-            {{-- Buttons (balanced width: full on mobile, cozy on desktop) --}}
+            {{-- Buttons --}}
             <div class="mt-6 flex flex-col items-center">
                 @auth
                     <a href="/dashboard"
                        class="w-full md:w-auto md:min-w-[280px] inline-flex items-center justify-center px-8 py-3 rounded-2xl font-semibold transition hover:opacity-90"
-                       style="background:#2F5D46; color:#D8A24A;">
+                       style="background:{{ $GREEN }}; color:{{ $GOLD }};">
                         Go to Dashboard
                     </a>
                 @else
                     <a href="/login"
                        class="w-full md:w-auto md:min-w-[280px] inline-flex items-center justify-center px-8 py-3 rounded-2xl font-semibold transition hover:opacity-90"
-                       style="background:#2F5D46; color:#D8A24A;">
+                       style="background:{{ $GREEN }}; color:{{ $GOLD }};">
                         Login
                     </a>
 
@@ -103,7 +103,7 @@
                         New here?
                         <a href="/register"
                            class="font-semibold underline underline-offset-4"
-                           style="color:#D8A24A;">
+                           style="color:{{ $GOLD }};">
                             Register
                         </a>
                     </div>
