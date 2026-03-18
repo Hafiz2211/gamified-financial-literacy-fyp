@@ -21,6 +21,12 @@ class QuizController extends Controller
         
         foreach ($quizzes as $quiz) {
             $status = $this->getQuizStatus($user, $quiz);
+            
+            // 🔴 ADDED: Add best attempt for completed quizzes
+            if ($status['status'] == 'completed') {
+                $status['best_attempt'] = $quiz->getBestAttempt($user->id);
+            }
+            
             $quizStatus[$quiz->id] = $status;
             if ($status['available']) {
                 $totalAvailable++;
@@ -131,7 +137,7 @@ class QuizController extends Controller
                 'completed_at' => now()
             ]);
             
-            // 🔴 NEW: Save each answer to database
+            // Save each answer to database
             foreach ($questions as $question) {
                 $userAnswer = $request->answers[$question->id] ?? null;
                 $isCorrect = $userAnswer && $question->isCorrect($userAnswer);
@@ -180,7 +186,7 @@ class QuizController extends Controller
                 'correct' => $correctCount,
                 'total' => $totalQuestions,
                 'attempt_number' => $attemptNumber,
-                'attempt_id' => $attempt->id, // 🔴 Send attempt ID to frontend
+                'attempt_id' => $attempt->id,
                 'message' => $passed 
                     ? "🎉 Congratulations! You passed with {$score}% and earned {$xpEarned} XP and {$coinsEarned} coins!"
                     : "You scored {$score}%. You need {$quiz->passing_score}% to pass. Try again!",
@@ -215,7 +221,7 @@ class QuizController extends Controller
         }
     }
     
-    // 🔴 NEW: Results method with answers
+    // Results method with answers
     public function results(Quiz $quiz, UserQuizAttempt $attempt)
     {
         $user = auth()->user();

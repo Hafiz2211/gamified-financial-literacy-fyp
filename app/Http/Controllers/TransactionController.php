@@ -83,13 +83,24 @@ class TransactionController extends Controller
             ['transaction_count' => $todayCount + 1]
         );
 
+        // 🔴 FIXED: Store old level BEFORE updating
+        $oldLevel = $user->level;
+        
         // Update user totals
         $user->xp += $xpReward;
         $user->coins += $coinReward;
+        
+        // 🔴 FIXED: Use the model's updateLevel method
+        if (method_exists($user, 'updateLevel')) {
+            $user->updateLevel();
+        }
+        
         $user->save();
-
-        // Check for level up - FIXED
-        $levelUpData = $this->checkLevelUp($user);
+        
+        // 🔴 FIXED: Flash notification if leveled up
+        if ($user->level > $oldLevel) {
+            session()->flash('level_up', ['new_level' => $user->level]);
+        }
 
         return response()->json([
             'success' => true,
@@ -97,8 +108,8 @@ class TransactionController extends Controller
                 ? "✅ +10 XP, +10 coins! (First 10 bonus)"
                 : "📝 +1 XP, +1 coin (Daily limit reached)",
             'transaction' => $transaction,
-            'level_up' => $levelUpData['leveled_up'],
-            'new_level' => $levelUpData['new_level'] ?? null,
+            'level_up' => $user->level > $oldLevel,
+            'new_level' => $user->level > $oldLevel ? $user->level : null,
             'user' => [
                 'xp' => $user->xp,
                 'coins' => $user->coins,
@@ -123,42 +134,5 @@ class TransactionController extends Controller
         $transaction->delete();
 
         return response()->json(['success' => true, 'message' => 'Transaction deleted']);
-    }
-
-    /**
-     * Check if user levels up - FIXED VERSION
-     */
-    private function checkLevelUp($user)
-    {
-        $leveledUp = false;
-        $oldLevel = $user->level;
-        
-        // Keep leveling up while enough XP
-        while (true) {
-            $xpNeededForNextLevel = 200 + ($user->level * 100);
-            
-            if ($user->xp >= $xpNeededForNextLevel) {
-                $user->level += 1;
-                $user->xp = $user->xp - $xpNeededForNextLevel;
-                $leveledUp = true;
-            } else {
-                break;
-            }
-        }
-        
-        if ($leveledUp) {
-            $user->save();
-            
-            // Store notification in session with put() instead of flash()
-            session()->put('level_up', [
-                'old_level' => $oldLevel,
-                'new_level' => $user->level
-            ]);
-        }
-        
-        return [
-            'leveled_up' => $leveledUp,
-            'new_level' => $user->level
-        ];
     }
 }

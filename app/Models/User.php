@@ -12,7 +12,6 @@ class User extends Authenticatable
 
     /**
      * The model's default values for attributes.
-     * This sets defaults WHEN CREATING a new model instance
      */
     protected $attributes = [
         'level' => 1,
@@ -24,8 +23,6 @@ class User extends Authenticatable
 
     /**
      * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
      */
     protected $fillable = [
         'name',
@@ -40,8 +37,6 @@ class User extends Authenticatable
 
     /**
      * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -52,8 +47,6 @@ class User extends Authenticatable
 
     /**
      * The attributes that should be cast.
-     *
-     * @var array<string, string>
      */
     protected function casts(): array
     {
@@ -69,30 +62,20 @@ class User extends Authenticatable
     protected static function booted()
     {
         static::creating(function ($user) {
-            // Ensure null values are replaced with defaults
-            if (is_null($user->level)) {
-                $user->level = 1;
-            }
-            if (is_null($user->xp)) {
-                $user->xp = 0;
-            }
-            if (is_null($user->coins)) {
-                $user->coins = 0;
-            }
-            if (is_null($user->town_level)) {
-                $user->town_level = 1;
-            }
-            if (is_null($user->population)) {
-                $user->population = 100;
-            }
+            if (is_null($user->level)) $user->level = 1;
+            if (is_null($user->xp)) $user->xp = 0;
+            if (is_null($user->coins)) $user->coins = 0;
+            if (is_null($user->town_level)) $user->town_level = 1;
+            if (is_null($user->population)) $user->population = 100;
         });
     }
 
-    // 🔴 ADD THIS METHOD - Level up logic
-    public function updateLevel()
+    /**
+     * Level thresholds (cumulative XP required for each level)
+     */
+    public function getLevelThresholds()
     {
-        // Level progression formula: 200 + (current level × 100)
-        $levelThresholds = [
+        return [
             1 => 0,
             2 => 300,
             3 => 700,
@@ -104,19 +87,79 @@ class User extends Authenticatable
             9 => 5200,
             10 => 6300,
         ];
+    }
+
+    /**
+     * Update user level based on XP thresholds
+     * PRESERVES XP - does NOT reset it!
+     */
+    public function updateLevel()
+    {
+        $thresholds = $this->getLevelThresholds();
+        $currentXP = $this->xp;
         
-        $newLevel = $this->level;
-        foreach ($levelThresholds as $level => $threshold) {
-            if ($this->xp >= $threshold) {
+        // Find the correct level based on XP
+        $newLevel = 1;
+        foreach ($thresholds as $level => $threshold) {
+            if ($currentXP >= $threshold) {
                 $newLevel = $level;
             }
         }
         
-        if ($newLevel > $this->level) {
+        // Update level if changed
+        if ($this->level != $newLevel) {
             $this->level = $newLevel;
         }
         
         return $this;
+    }
+
+    /**
+     * Force recalculate level and save
+     */
+    public function recalculateLevel()
+    {
+        $thresholds = $this->getLevelThresholds();
+        $currentXP = $this->xp;
+        
+        $correctLevel = 1;
+        foreach ($thresholds as $level => $threshold) {
+            if ($currentXP >= $threshold) {
+                $correctLevel = $level;
+            }
+        }
+        
+        $this->level = $correctLevel;
+        $this->save();
+        
+        return $this;
+    }
+
+    /**
+     * Get XP needed for next level
+     */
+    public function getXpToNextLevel()
+    {
+        $thresholds = $this->getLevelThresholds();
+        $currentLevel = $this->level;
+        $nextLevel = min($currentLevel + 1, 10);
+        
+        $currentThreshold = $thresholds[$currentLevel];
+        $nextThreshold = $thresholds[$nextLevel];
+        
+        return $nextThreshold - $currentThreshold;
+    }
+
+    /**
+     * Get XP progress in current level
+     */
+    public function getXpInCurrentLevel()
+    {
+        $thresholds = $this->getLevelThresholds();
+        $currentLevel = $this->level;
+        $currentThreshold = $thresholds[$currentLevel];
+        
+        return $this->xp - $currentThreshold;
     }
 
     // Your existing relationships
@@ -137,7 +180,6 @@ class User extends Authenticatable
         return $this->hasMany(DailyStat::class);
     }
 
-    // 🔴 ADD THESE NEW RELATIONSHIPS for Quiz system
     public function quizAttempts()
     {
         return $this->hasMany(UserQuizAttempt::class);
@@ -149,5 +191,4 @@ class User extends Authenticatable
                     ->withPivot(['score', 'passed', 'attempt_number', 'reward_claimed', 'xp_earned', 'coins_earned'])
                     ->withTimestamps();
     }
-
 }

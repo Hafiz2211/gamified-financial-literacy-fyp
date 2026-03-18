@@ -118,46 +118,16 @@
 @endphp
 
 <div class="app-container">
-    {{-- Sidebar --}}
-    <div class="sidebar">
-        <div class="p-5 border-b" style="border-color: rgba(255,255,255,0.12);">
-            <div class="flex items-center gap-3">
-                <img src="{{ asset('images/brusave-logo.png') }}" alt="BruSave logo" class="h-8 w-auto object-contain">
-                <div>
-                    <div class="text-xl font-extrabold leading-tight" style="color:{{ $GOLD }};">Bru<i>Save</i></div>
-                    <div class="text-xs" style="color: rgba(216,162,74,0.78);">Build Wealth, Build Your Town</div>
-                </div>
-            </div>
-        </div>
-
-        <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
-            @foreach ($nav as $item)
-                @php $isActive = $active === $item['key']; @endphp
-                <a href="{{ $item['href'] }}"
-                   class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition hover:opacity-95"
-                   style="border-color: {{ $isActive ? 'rgba(216,162,74,0.60)' : 'rgba(255,255,255,0.16)' }};
-                          background:  {{ $isActive ? 'rgba(216,162,74,0.14)' : 'rgba(255,255,255,0.04)' }};
-                          color:       {{ $isActive ? $GOLD : 'rgba(255,255,255,0.92)' }};">
-                    <span class="text-lg">{{ $item['icon'] }}</span>
-                    <span class="font-semibold">{{ $item['label'] }}</span>
-                </a>
-            @endforeach
-        </nav>
-
-        <div class="p-4">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit"
-                        class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border font-semibold transition hover:opacity-95"
-                        style="border-color: rgba(255,255,255,0.16); color: rgba(255,255,255,0.92); background: rgba(255,255,255,0.04);">
-                    <span>🚪</span> Logout
-                </button>
-            </form>
-        </div>
-    </div>
+    {{-- Sidebar with profile dropdown --}}
+    @include('partials.sidebar', ['nav' => $nav, 'active' => $active, 'GREEN' => $GREEN, 'GOLD' => $GOLD])
 
     {{-- Main content --}}
     <div class="main-content">
+        {{-- Profile dropdown in top right --}}
+        <div style="display: flex; justify-content: flex-end; padding: 20px 24px 0;">
+            @include('components.profile-dropdown', ['user' => auth()->user()])
+        </div>
+        
         <div style="max-width:900px; margin:0 auto; padding:32px 24px;">
             {{-- Quiz Header --}}
             <div class="flex items-center justify-between mb-6">
@@ -284,7 +254,6 @@
                     Quizzes
                 </a>
                 
-                {{-- 🔴 FIXED: Both buttons available, logic decides visibility --}}
                 <span id="resultButtonContainer" class="flex-1">
                     <button onclick="location.reload()" 
                             id="retryBtn"
@@ -313,11 +282,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const retryBtn = document.getElementById('retryBtn');
     const viewDetailsBtn = document.getElementById('viewDetailsBtn');
     
-    // Initially hide both buttons
     retryBtn.style.display = 'none';
     viewDetailsBtn.style.display = 'none';
     
-    // Track answered questions
     const radios = document.querySelectorAll('input[type="radio"]');
     const updateAnsweredCount = () => {
         const checked = document.querySelectorAll('input[type="radio"]:checked').length;
@@ -344,7 +311,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Form submission
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -398,20 +364,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const rewardDiv = document.getElementById('resultReward');
         
-        // 🔴 FIXED: View Details shows for BOTH pass and fail
         viewDetailsBtn.style.display = 'block';
         viewDetailsBtn.href = '/quiz/' + {{ $quiz->id }} + '/results/' + result.attempt_id;
         
         if (result.passed && result.reward_claimed) {
             document.getElementById('rewardAmount').textContent = result.xp_earned + ' XP / ' + result.coins_earned + ' 🪙';
             rewardDiv.style.display = 'flex';
-            
-            // ✅ PASSED: Cannot retry (already got reward)
             retryBtn.style.display = 'none';
         } else {
             rewardDiv.style.display = 'none';
-            
-            // ✅ FAILED: Can retry
             retryBtn.style.display = 'block';
         }
         

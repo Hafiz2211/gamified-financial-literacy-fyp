@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lesson;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class LessonController extends Controller
 {
@@ -56,21 +57,41 @@ class LessonController extends Controller
             'completed_at' => now()
         ]);
 
+        // Store old level BEFORE updating
+        $oldLevel = $user->level;
+        
         // Update user totals
         $user->xp += 50;
         $user->coins += 50;
+        
+        // Update level based on new XP
+        if (method_exists($user, 'updateLevel')) {
+            $user->updateLevel();
+        }
+        
         $user->save();
-
-        // Check for level up - FIXED
-        $levelUpData = $this->checkLevelUp($user);
+        
+        // Check for level up
+        $leveledUp = $user->level > $oldLevel;
+        
+        // Flash for next page load
+        if ($leveledUp) {
+            session()->flash('level_up', ['new_level' => $user->level]);
+            
+            Log::info('✅ LEVEL UP NOTIFICATION SET', [
+                'user_id' => $user->id,
+                'old_level' => $oldLevel,
+                'new_level' => $user->level
+            ]);
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Lesson completed! +50 XP, +50 coins',
             'xp_earned' => 50,
             'coins_earned' => 50,
-            'level_up' => $levelUpData['leveled_up'],
-            'new_level' => $levelUpData['new_level'] ?? null,
+            'level_up' => $leveledUp,
+            'new_level' => $leveledUp ? $user->level : null,
             'user' => [
                 'xp' => $user->xp,
                 'coins' => $user->coins,
@@ -92,53 +113,5 @@ class LessonController extends Controller
             'completed_count' => $completedCount,
             'total_lessons' => $totalLessons
         ]);
-    }
-
-    /**
-     * Check if user levels up - FIXED VERSION
-     */
-    private function checkLevelUp($user)
-    {
-        $leveledUp = false;
-        $oldLevel = $user->level;
-        $levelsGained = 0;
-        
-        // Keep leveling up while enough XP
-        while (true) {
-            $xpNeededForNextLevel = 200 + ($user->level * 100);
-            
-            if ($user->xp >= $xpNeededForNextLevel) {
-                $user->level += 1;
-                $user->xp = $user->xp - $xpNeededForNextLevel;
-                $leveledUp = true;
-                $levelsGained++;
-            } else {
-                break;
-            }
-        }
-        
-        if ($leveledUp) {
-            $user->save();
-            
-            // Store notification in session with put() instead of flash()
-            session()->put('level_up', [
-                'old_level' => $oldLevel,
-                'new_level' => $user->level,
-                'levels_gained' => $levelsGained
-            ]);
-            
-            \Log::info('Level up triggered', [
-                'user_id' => $user->id,
-                'old_level' => $oldLevel,
-                'new_level' => $user->level,
-                'xp_left' => $user->xp
-            ]);
-        }
-        
-        return [
-            'leveled_up' => $leveledUp,
-            'new_level' => $user->level,
-            'xp_left' => $user->xp
-        ];
     }
 }

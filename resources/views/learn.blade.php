@@ -59,11 +59,31 @@
                         You reached Level {{ session('level_up')['new_level'] }}!
                     </div>
                 </div>
-                <button onclick="this.parentElement.parentElement.parentElement.remove();" style="background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; font-size:18px; margin-left:8px;">✕</button>
+                <button onclick="this.parentElement.parentElement.parentElement.remove(); 
+                    fetch('/clear-notification', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json'
+                        }
+                    });" 
+                    style="background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; font-size:18px; margin-left:8px;">✕</button>
             </div>
         </div>
     </div>
-    @php session()->forget('level_up'); @endphp
+    
+    {{-- Auto clear after 5 seconds --}}
+    <script>
+        setTimeout(function() {
+            fetch('/clear-notification', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
+                }
+            });
+        }, 5000);
+    </script>
 @endif
 
 @php
@@ -82,7 +102,7 @@
         ['key'=>'town','label'=>'Town','href'=>'/town','icon'=>'🏘️'],
     ];
 
-    // 🔴 FIXED: Get completed lessons with error handling
+    // Get completed lessons with error handling
     $completedLessonIds = [];
     $completedLessons = [];
     
@@ -91,11 +111,10 @@
             $completedLessonIds = $user->lessons()->pluck('lesson_id')->toArray();
         }
     } catch (\Exception $e) {
-        // Log error but don't break the page
         \Log::error('Error fetching lessons: ' . $e->getMessage());
     }
     
-    // Map database IDs to string IDs (for display purposes)
+    // Map database IDs to string IDs
     $lessonIdMap = [
         1 => 'needs-vs-wants',
         2 => 'budgeting-simple',
@@ -214,46 +233,16 @@
 @endphp
 
 <div class="app-container">
-    {{-- Sidebar --}}
-    <div class="sidebar">
-        <div class="p-5 border-b" style="border-color: rgba(255,255,255,0.12);">
-            <div class="flex items-center gap-3">
-                <img src="{{ asset('images/brusave-logo.png') }}" alt="BruSave logo" class="h-8 w-auto object-contain">
-                <div>
-                    <div class="text-xl font-extrabold leading-tight" style="color:{{ $GOLD }};">Bru<i>Save</i></div>
-                    <div class="text-xs" style="color: rgba(216,162,74,0.78);">Build Wealth, Build Your Town</div>
-                </div>
-            </div>
-        </div>
-
-        <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
-            @foreach ($nav as $item)
-                @php $isActive = $active === $item['key']; @endphp
-                <a href="{{ $item['href'] }}"
-                   class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition hover:opacity-95"
-                   style="border-color: {{ $isActive ? 'rgba(216,162,74,0.60)' : 'rgba(255,255,255,0.16)' }};
-                          background:  {{ $isActive ? 'rgba(216,162,74,0.14)' : 'rgba(255,255,255,0.04)' }};
-                          color:       {{ $isActive ? $GOLD : 'rgba(255,255,255,0.92)' }};">
-                    <span class="text-lg">{{ $item['icon'] }}</span>
-                    <span class="font-semibold">{{ $item['label'] }}</span>
-                </a>
-            @endforeach
-        </nav>
-
-        <div class="p-4">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit"
-                        class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border font-semibold transition hover:opacity-95"
-                        style="border-color: rgba(255,255,255,0.16); color: rgba(255,255,255,0.92); background: rgba(255,255,255,0.04);">
-                    <span>🚪</span> Logout
-                </button>
-            </form>
-        </div>
-    </div>
+    {{-- Sidebar with profile dropdown --}}
+    @include('partials.sidebar', ['nav' => $nav, 'active' => $active, 'GREEN' => $GREEN, 'GOLD' => $GOLD])
 
     {{-- Main content --}}
     <div class="main-content">
+        {{-- Profile dropdown in top right --}}
+        <div style="display: flex; justify-content: flex-end; padding: 20px 24px 0;">
+            @include('components.profile-dropdown', ['user' => auth()->user()])
+        </div>
+        
         <div style="max-width:1200px; margin:0 auto; padding:32px 24px;">
             {{-- Intro --}}
             <section style="max-width:768px;">
@@ -371,6 +360,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBar = document.getElementById('progressBar');
     const totalLessons = {{ count($lessons) }};
 
+    // Function to show level up notification
+    function showLevelUpNotification(newLevel) {
+        const notif = document.createElement('div');
+        notif.className = 'level-up-notification';
+        notif.style.cssText = 'position:fixed; top:20px; right:20px; z-index:9999;';
+        notif.innerHTML = `
+            <div style="background:#2F5D46; color:#D8A24A; padding:16px 24px; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.2); border-left:4px solid #D8A24A;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span style="font-size:28px;">🎉</span>
+                    <div>
+                        <div style="font-weight:800; font-size:18px;">Level Up!</div>
+                        <div style="font-size:14px; color:rgba(255,255,255,0.9);">
+                            You reached Level ${newLevel}!
+                        </div>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.parentElement.remove();" style="background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; font-size:18px; margin-left:8px;">✕</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(notif);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => notif.remove(), 5000);
+    }
+
     // Update progress display
     const updateProgress = async () => {
         try {
@@ -412,6 +426,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     btn.style.color = '#F6F1E6';
 
                     alert(`✅ Lesson completed!\n+${xpReward} XP\n+${coinReward} coins`);
+
+                    // 🔥 Show level up notification if it happened
+                    if (result.level_up) {
+                        showLevelUpNotification(result.new_level);
+                    }
 
                     await updateProgress();
                     setTimeout(() => window.location.reload(), 1000);

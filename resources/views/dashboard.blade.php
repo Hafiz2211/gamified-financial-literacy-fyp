@@ -49,7 +49,18 @@
 
 <body class="text-slate-900" style="background:#F6F1E6;">
 {{-- Level Up Notification --}}
-@if(session('level_up'))
+@php
+    $levelUpData = session('level_up');
+    $usePut = false;
+    
+    // Also check for put() style session if needed
+    if (!$levelUpData && session()->has('level_up_put')) {
+        $levelUpData = session('level_up_put');
+        $usePut = true;
+    }
+@endphp
+
+@if($levelUpData)
     <div id="levelUpNotification" class="level-up-notification" style="position:fixed; top:20px; right:20px; z-index:9999;">
         <div style="background:#2F5D46; color:#D8A24A; padding:16px 24px; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.2); border-left:4px solid #D8A24A;">
             <div style="display:flex; align-items:center; gap:12px;">
@@ -57,14 +68,20 @@
                 <div>
                     <div style="font-weight:800; font-size:18px;">Level Up!</div>
                     <div style="font-size:14px; color:rgba(255,255,255,0.9);">
-                        You reached Level {{ session('level_up')['new_level'] }}!
+                        You reached Level {{ $levelUpData['new_level'] }}!
                     </div>
                 </div>
-                <button onclick="this.parentElement.parentElement.parentElement.remove();" style="background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; font-size:18px; margin-left:8px;">✕</button>
+                <button onclick="this.parentElement.parentElement.parentElement.remove(); 
+                    @if($usePut)
+                        fetch('/clear-notification', {
+                            method: 'POST', 
+                            headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}
+                        });
+                    @endif" 
+                    style="background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; font-size:18px; margin-left:8px;">✕</button>
             </div>
         </div>
     </div>
-    @php session()->forget('level_up'); @endphp
 @endif
 
 @php
@@ -88,12 +105,52 @@
         ->whereYear('date', now()->year)
         ->sum('amount');
 
-    // Level calculation (300/400/500/600/700)
+    // Level calculation with proper thresholds matching User.php
     $currentLevel = $user->level ?? 1;
     $currentXP = $user->xp ?? 0;
-    $xpNeededForNextLevel = 200 + ($currentLevel * 100);
-    $xpProgress = $xpNeededForNextLevel > 0 ? ($currentXP / $xpNeededForNextLevel) * 100 : 0;
-    $xpDisplay = $currentXP . '/' . $xpNeededForNextLevel . ' XP to Level ' . ($currentLevel + 1);
+
+    // Define XP thresholds for each level (MUST match User.php)
+    $levelThresholds = [
+        1 => 0,
+        2 => 300,
+        3 => 700,
+        4 => 1200,
+        5 => 1800,
+        6 => 2500,
+        7 => 3300,
+        8 => 4200,
+        9 => 5200,
+        10 => 6300,
+    ];
+
+    // XP needed for current level to next level
+    $currentLevelThreshold = $levelThresholds[$currentLevel] ?? 0;
+    $nextLevelThreshold = $levelThresholds[$currentLevel + 1] ?? ($currentLevelThreshold + 600);
+
+    // XP needed to reach next level
+    $xpNeededForNextLevel = $nextLevelThreshold - $currentLevelThreshold;
+
+    // XP earned in current level
+    $xpInCurrentLevel = $currentXP - $currentLevelThreshold;
+    $xpInCurrentLevel = max(0, $xpInCurrentLevel);
+
+    // Progress percentage
+    $xpProgress = $xpNeededForNextLevel > 0 ? ($xpInCurrentLevel / $xpNeededForNextLevel) * 100 : 0;
+    $xpProgress = min(100, max(0, $xpProgress));
+
+    // Display text
+    $xpDisplay = $xpInCurrentLevel . '/' . $xpNeededForNextLevel . ' XP to Level ' . ($currentLevel + 1);
+
+    // Title based on level
+    if ($currentLevel <= 2) {
+        $title = 'New Mayor';
+    } elseif ($currentLevel <= 4) {
+        $title = 'Rising Mayor';
+    } elseif ($currentLevel <= 6) {
+        $title = 'Great Mayor';
+    } else {
+        $title = 'Legendary Mayor';
+    }
 
     // Recent activity (last 5 transactions)
     $recentTransactions = $user->transactions()->latest()->take(5)->get();
@@ -116,45 +173,15 @@
 
 <div class="app-container">
     {{-- Sidebar --}}
-    <div class="sidebar">
-        <div class="p-5 border-b" style="border-color: rgba(255,255,255,0.12);">
-            <div class="flex items-center gap-3">
-                <img src="{{ asset('images/brusave-logo.png') }}" alt="BruSave logo" class="h-8 w-auto object-contain">
-                <div>
-                    <div class="text-xl font-extrabold leading-tight" style="color:{{ $GOLD }};">Bru<i>Save</i></div>
-                    <div class="text-xs" style="color: rgba(216,162,74,0.78);">Build Wealth, Build Your Town</div>
-                </div>
-            </div>
-        </div>
-
-        <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
-            @foreach ($nav as $item)
-                @php $isActive = $active === $item['key']; @endphp
-                <a href="{{ $item['href'] }}"
-                   class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition hover:opacity-95"
-                   style="border-color: {{ $isActive ? 'rgba(216,162,74,0.60)' : 'rgba(255,255,255,0.16)' }};
-                          background:  {{ $isActive ? 'rgba(216,162,74,0.14)' : 'rgba(255,255,255,0.04)' }};
-                          color:       {{ $isActive ? $GOLD : 'rgba(255,255,255,0.92)' }};">
-                    <span class="text-lg">{{ $item['icon'] }}</span>
-                    <span class="font-semibold">{{ $item['label'] }}</span>
-                </a>
-            @endforeach
-        </nav>
-
-        <div class="p-4">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit"
-                        class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border font-semibold transition hover:opacity-95"
-                        style="border-color: rgba(255,255,255,0.16); color: rgba(255,255,255,0.92); background: rgba(255,255,255,0.04);">
-                    <span>🚪</span> Logout
-                </button>
-            </form>
-        </div>
-    </div>
+    @include('partials.sidebar', ['nav' => $nav, 'active' => $active, 'GREEN' => $GREEN, 'GOLD' => $GOLD])
 
     {{-- Main content --}}
     <div class="main-content">
+        {{-- Profile dropdown in top right --}}
+        <div style="display: flex; justify-content: flex-end; padding: 20px 24px 0;">
+            @include('components.profile-dropdown', ['user' => auth()->user()])
+        </div>
+        
         <div style="max-width:1200px; margin:0 auto; padding:32px 24px;">
             {{-- Welcome header --}}
             <section class="rounded-2xl border shadow-lg p-6 md:p-7"
@@ -192,7 +219,7 @@
                         </div>
                     @endforeach
 
-                    {{-- Level Card --}}
+                    {{-- Level Card with Title --}}
                     <div class="rounded-2xl border p-5 shadow-sm"
                          style="border-color: rgba(47,93,70,0.16); background:{{ $CARD }};">
                         <div class="flex items-start justify-between gap-4">
@@ -203,6 +230,9 @@
                                 </div>
                                 <div class="mt-1 text-2xl font-extrabold" style="color:{{ $GREEN }};">
                                     Level {{ $currentLevel }}
+                                </div>
+                                <div class="mt-1 text-sm font-medium" style="color: {{ $GOLD }};">
+                                    {{ $title }}
                                 </div>
                                 <div class="mt-3">
                                     <div class="h-2.5 rounded-full overflow-hidden"
@@ -233,7 +263,7 @@
                             @forelse($recentTransactions as $transaction)
                                 @php
                                     $isIncome = $transaction->type === 'income';
-                                    $title = $isIncome ? 'Income: ' . $transaction->category : 'Expense: ' . $transaction->category;
+                                    $activityTitle = $isIncome ? 'Income: ' . $transaction->category : 'Expense: ' . $transaction->category;
                                     $time = $transaction->created_at->diffForHumans();
                                     $delta = $isIncome ? '+' : '-';
                                     $delta .= 'B$' . number_format($transaction->amount, 2);
@@ -241,7 +271,7 @@
                                 <div class="py-4 flex items-center justify-between gap-4">
                                     <div class="min-w-0">
                                         <div class="font-semibold truncate" style="color: rgba(20,30,25,0.92);">
-                                            {{ $title }}
+                                            {{ $activityTitle }}
                                         </div>
                                         <div class="text-xs mt-1" style="color: rgba(47,93,70,0.65);">
                                             {{ $time }}
