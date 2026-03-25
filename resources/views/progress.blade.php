@@ -526,7 +526,7 @@
             </section>
 
             <footer class="text-center text-xs pt-8 pb-2" style="color: rgba(47,93,70,0.75);">
-                © {{ date('Y') }} Bru<i>Save</i> • Buy furniture to decorate your room!
+                © {{ date('Y') }} Bru<i>Save</i> 
             </footer>
         </div>
     </div>
