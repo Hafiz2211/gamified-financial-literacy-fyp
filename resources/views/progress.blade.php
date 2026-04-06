@@ -263,7 +263,7 @@
         ['key'=>'learn','label'=>'Learn','href'=>'/learn','icon'=>'📖'],
         ['key'=>'quiz','label'=>'Quiz','href'=>'/quiz','icon'=>'❓'],
         ['key'=>'track','label'=>'Track Spending','href'=>'/track-spending','icon'=>'🧾'],
-        ['key'=>'progress','label'=>'Room','href'=>'/progress','icon'=>'🏆'],
+        ['key'=>'progress','label'=>'Achievement','href'=>'/progress','icon'=>'🏆'],
         ['key'=>'town','label'=>'Town','href'=>'/town','icon'=>'🏘️'],
     ];
 
@@ -312,7 +312,7 @@
     
     // Determine title based on level
     if ($level <= 2) {
-        $title = 'Beginner Mayor';
+        $title = 'New Mayor';
     } elseif ($level <= 4) {
         $title = 'Rising Mayor';
     } elseif ($level <= 6) {
@@ -396,11 +396,11 @@
                 <div class="flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <div class="text-2xl font-extrabold" style="color:{{ $GREEN }};">
-                            {{ $userName }}'s Room
+                            {{ $userName }}'s Home
                         </div>
-                        <div class="text-sm font-semibold mt-1" style="color:{{ $GOLD }};">
-                            <span id="titleDisplay">{{ $title }}</span>
-                        </div>
+                         <p class="mt-2 text-sm" style="color: rgba(47,93,70,0.8);">
+                            Unlock furniture by completing lessons, quizzes and track spending. Decorate your home and show off your achievements!
+                         </p>
                     </div>
 
                     <div class="flex gap-6">

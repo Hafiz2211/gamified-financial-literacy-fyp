@@ -11,7 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // 🔴 ADD THIS - Exclude Godot API routes from CSRF protection
+        $middleware->validateCsrfTokens(except: [
+            '/api/game/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

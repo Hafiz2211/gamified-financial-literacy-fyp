@@ -12,10 +12,12 @@ class StatsController extends Controller
     {
         $user = $request->user();
         
-        // Get selected month or use current month
-        $selectedMonth = $request->get('month', now()->month);
-        $selectedYear = $request->get('year', now()->year);
-        $selectedDate = now()->setYear($selectedYear)->setMonth($selectedMonth);
+        // Convert to integers to prevent Carbon error
+        $selectedMonth = (int) $request->get('month', now()->month);
+        $selectedYear = (int) $request->get('year', now()->year);
+        
+        // Use Carbon::create() instead of setYear/setMonth
+        $selectedDate = Carbon::create($selectedYear, $selectedMonth, 1);
         
         // Get available months for dropdown
         $availableMonths = $user->transactions()
@@ -40,13 +42,9 @@ class StatsController extends Controller
             ->groupBy('category')
             ->get();
 
-        // DEBUG: Get daily spending for last 7 days
+        // Get daily spending for last 7 days
         $dailyData = [];
         $today = Carbon::now();
-        
-        // Add debug comments that will appear in HTML source
-        echo "<!-- DEBUG: Today is " . $today->format('Y-m-d') . " -->";
-        echo "<!-- DEBUG: Server time: " . date('Y-m-d H:i:s') . " -->";
         
         for ($i = 6; $i >= 0; $i--) {
             $date = $today->copy()->subDays($i);
@@ -59,14 +57,12 @@ class StatsController extends Controller
                 ->sum('amount');
             
             $dailyData[$displayDate] = $total ?: 0;
-            
-            echo "<!-- DEBUG: Day $i = $displayDate ($dateString) total = $total -->";
         }
 
         // Get monthly comparison (last 3 months)
         $monthlyData = [];
         for ($i = 2; $i >= 0; $i--) {
-            $month = now()->subMonths($i);
+            $month = Carbon::now()->subMonths($i);
             $income = $user->transactions()
                 ->where('type', 'income')
                 ->whereMonth('date', $month->month)

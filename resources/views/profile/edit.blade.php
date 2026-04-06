@@ -20,7 +20,7 @@
         ['key'=>'learn','label'=>'Learn','href'=>'/learn','icon'=>'📖'],
         ['key'=>'quiz','label'=>'Quiz','href'=>'/quiz','icon'=>'❓'],
         ['key'=>'track','label'=>'Track Spending','href'=>'/track-spending','icon'=>'🧾'],
-        ['key'=>'progress','label'=>'My Room','href'=>'/progress','icon'=>'🏆'],
+        ['key'=>'progress','label'=>'Achievement','href'=>'/progress','icon'=>'🏆'],
         ['key'=>'town','label'=>'Town','href'=>'/town','icon'=>'🏘️'],
     ];
 @endphp
@@ -99,18 +99,14 @@
                             @enderror
                         </div>
 
-                        {{-- Email --}}
+                        {{-- Email - Read only --}}
                         <div>
                             <label class="block text-sm font-semibold mb-1" style="color:{{ $GREEN }};">Email</label>
                             <input type="email" 
-                                   name="email" 
-                                   value="{{ old('email', $user->email) }}" 
-                                   required
-                                   class="w-full rounded-xl border px-4 py-3 focus:outline-none"
-                                   style="border-color: rgba(47,93,70,0.18); background: white;">
-                            @error('email')
-                                <p class="text-xs mt-1" style="color: #b43c3c;">{{ $message }}</p>
-                            @enderror
+                                   value="{{ $user->email }}" 
+                                   disabled
+                                   class="w-full rounded-xl border px-4 py-3 bg-gray-50 cursor-not-allowed"
+                                   style="border-color: rgba(47,93,70,0.18); background: #f9fafb; color: #6b7280;">
                         </div>
                     </div>
                 </div>

@@ -83,21 +83,15 @@ class TransactionController extends Controller
             ['transaction_count' => $todayCount + 1]
         );
 
-        // 🔴 FIXED: Store old level BEFORE updating
+        // Store old level BEFORE updating
         $oldLevel = $user->level;
         
         // Update user totals
         $user->xp += $xpReward;
         $user->coins += $coinReward;
-        
-        // 🔴 FIXED: Use the model's updateLevel method
-        if (method_exists($user, 'updateLevel')) {
-            $user->updateLevel();
-        }
-        
         $user->save();
-        
-        // 🔴 FIXED: Flash notification if leveled up
+
+        // Flash notification if leveled up
         if ($user->level > $oldLevel) {
             session()->flash('level_up', ['new_level' => $user->level]);
         }
@@ -134,5 +128,27 @@ class TransactionController extends Controller
         $transaction->delete();
 
         return response()->json(['success' => true, 'message' => 'Transaction deleted']);
+    }
+
+    /**
+     * 🔴 FIXED: ADDED MISSING stats() METHOD
+     * Get monthly income and expense totals for the stats cards
+     */
+    public function stats(Request $request)
+    {
+        $user = $request->user();
+        
+        return response()->json([
+            'monthlyIncome' => $user->transactions()
+                ->where('type', 'income')
+                ->whereMonth('date', now()->month)
+                ->whereYear('date', now()->year)
+                ->sum('amount'),
+            'monthlyExpense' => $user->transactions()
+                ->where('type', 'expense')
+                ->whereMonth('date', now()->month)
+                ->whereYear('date', now()->year)
+                ->sum('amount'),
+        ]);
     }
 }

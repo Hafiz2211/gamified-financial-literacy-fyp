@@ -26,16 +26,17 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
         
+        // 🔴 REMOVED email validation - email cannot be changed
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'profile_photo' => ['nullable', 'image', 'max:2048'],
             'current_password' => ['nullable', 'required_with:new_password', 'current_password'],
             'new_password' => ['nullable', 'min:8', 'confirmed'],
         ]);
 
+        // 🔴 Only update name - email stays the same
         $user->name = $request->name;
-        $user->email = $request->email;
+        // $user->email = $request->email; // ← REMOVED - email cannot be changed
 
         if ($request->new_password) {
             $user->password = Hash::make($request->new_password);

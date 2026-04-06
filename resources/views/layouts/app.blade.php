@@ -57,7 +57,7 @@
             ['key' => 'learn', 'href' => route('learn'), 'icon' => '📖', 'label' => 'Learn'],
             ['key' => 'quiz', 'href' => route('quiz.index'), 'icon' => '❓', 'label' => 'Quiz'],
             ['key' => 'spending', 'href' => route('spending'), 'icon' => '🧾', 'label' => 'Track Spending'],
-            ['key' => 'progress', 'href' => route('progress'), 'icon' => '🏆', 'label' => 'Room'],
+            ['key' => 'progress', 'href' => route('progress'), 'icon' => '🏆', 'label' => 'Achievement'],
             ['key' => 'town', 'href' => route('town'), 'icon' => '🏘️', 'label' => 'Town'],
         ];
         

@@ -18,7 +18,7 @@ class User extends Authenticatable
         'xp' => 0,
         'coins' => 0,
         'town_level' => 1,
-        'population' => 100,
+        'population' => 0,
     ];
 
     /**
@@ -66,7 +66,7 @@ class User extends Authenticatable
             if (is_null($user->xp)) $user->xp = 0;
             if (is_null($user->coins)) $user->coins = 0;
             if (is_null($user->town_level)) $user->town_level = 1;
-            if (is_null($user->population)) $user->population = 100;
+            if (is_null($user->population)) $user->population = 0;
         });
     }
 

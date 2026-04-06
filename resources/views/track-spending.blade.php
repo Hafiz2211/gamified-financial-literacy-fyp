@@ -83,7 +83,6 @@
         </div>
     </div>
     
-    {{-- Auto clear after 5 seconds --}}
     <script>
         setTimeout(function() {
             fetch('/clear-notification', {
@@ -110,7 +109,7 @@
         ['key'=>'learn','label'=>'Learn','href'=>'/learn','icon'=>'📖'],
         ['key'=>'quiz','label'=>'Quiz','href'=>'/quiz','icon'=>'❓'],
         ['key'=>'track','label'=>'Track Spending','href'=>'/track-spending','icon'=>'🧾'],
-        ['key'=>'progress','label'=>'Room','href'=>'/progress','icon'=>'🏆'],
+        ['key'=>'progress','label'=>'Achievement','href'=>'/progress','icon'=>'🏆'],
         ['key'=>'town','label'=>'Town','href'=>'/town','icon'=>'🏘️'],
     ];
 
@@ -144,7 +143,7 @@
             <section class="mt-10">
                 <h1 class="text-3xl md:text-4xl font-extrabold" style="color:{{ $GREEN }};">Track Spending</h1>
                 <p class="mt-2" style="color: rgba(47,93,70,0.82);">
-                    Add your daily income and expenses
+                    Add your daily income and expenses. First 10 records daily = 10 XP + 10 coins each. Extra records = 1 XP + 1 coin. Resets every day at midnight!
                 </p>
             </section>
 
@@ -434,6 +433,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+    // 🔴 FIXED: Helper function to format date
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
     // Fetch and display transactions
     const loadTransactions = async () => {
         try {
@@ -466,9 +474,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             alt="receipt">` 
                     : '<span style="color: rgba(47,93,70,0.45);">—</span>';
 
+                // 🔴 FIXED: Format the date properly
+                const formattedDate = formatDate(t.date);
+
                 html += `
                     <tr>
-                        <td class="px-4 py-3" style="color: rgba(47,93,70,0.85);">${t.date}</td>
+                        <td class="px-4 py-3" style="color: rgba(47,93,70,0.85);">${formattedDate}</td>
                         <td class="px-4 py-3">
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
                                   style="background:${typePillBg}; color:#2F5D46; border: 1px solid rgba(47,93,70,0.12);">
@@ -595,7 +606,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 otherWrap.classList.add('hidden');
                 otherEl.value = '';
 
-                // 🔥 Show level up notification if it happened
+                // Show level up notification if it happened
                 if (result.level_up) {
                     showLevelUpNotification(result.new_level);
                 }

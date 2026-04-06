@@ -98,7 +98,7 @@
         ['key'=>'learn','label'=>'Learn','href'=>'/learn','icon'=>'📖'],
         ['key'=>'quiz','label'=>'Quiz','href'=>'/quiz','icon'=>'❓'],
         ['key'=>'track','label'=>'Track Spending','href'=>'/track-spending','icon'=>'🧾'],
-        ['key'=>'progress','label'=>'Room','href'=>'/progress','icon'=>'🏆'],
+        ['key'=>'progress','label'=>'Achievement','href'=>'/progress','icon'=>'🏆'],
         ['key'=>'town','label'=>'Town','href'=>'/town','icon'=>'🏘️'],
     ];
 

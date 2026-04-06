@@ -166,7 +166,7 @@
         ['key'=>'learn','label'=>'Learn','href'=>'/learn','icon'=>'📖'],
         ['key'=>'quiz','label'=>'Quiz','href'=>'/quiz','icon'=>'❓'],
         ['key'=>'track','label'=>'Track Spending','href'=>'/track-spending','icon'=>'🧾'],
-        ['key'=>'progress','label'=>'Room','href'=>'/progress','icon'=>'🏆'],
+        ['key'=>'progress','label'=>'Achievement','href'=>'/progress','icon'=>'🏆'],
         ['key'=>'town','label'=>'Town','href'=>'/town','icon'=>'🏘️'],
     ];
 @endphp
@@ -190,7 +190,7 @@
                     Welcome back, Mayor {{ $userName }}
                 </h1>
                 <p class="mt-2" style="color: rgba(47,93,70,0.78);">
-                    Track your spending and learn to earn coins and XP to unlock and purchase buildings.
+                    Track your spending and learn to earn coins and XP to unlock and purchase decorations and buildings.
                 </p>
 
                 {{-- Stat cards --}}

@@ -24,7 +24,7 @@
         $CARD = '#FFFBF2';
     @endphp
 
-    <main class="relative min-h-screen flex items-center justify-center px-6 py-10 overflow-hidden">
+    <main class="relative min-h-screen flex items-center justify-center px-6 py-8 overflow-hidden">
         {{-- Soft cozy glow behind header --}}
         <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-[320px] w-[640px] rounded-full blur-3xl opacity-20"
              style="background:{{ $GOLD }};"></div>
@@ -39,7 +39,7 @@
                     alt="BruSave logo"
                     class="mx-auto h-14 w-auto object-contain"
                 >
-                <div class="mt-3 text-4xl font-extrabold leading-tight" style="color:{{ $GREEN }};">
+                <div class="mt-3 text-3xl font-extrabold leading-tight" style="color:{{ $GREEN }};">
                     Bru<i>Save</i>
                 </div>
 
@@ -48,60 +48,56 @@
                     Build Wealth, Build Your Town
                 </div>
 
-                <div class="mx-auto mt-4 h-1 w-16 rounded-full"
+                <div class="mx-auto mt-3 h-1 w-14 rounded-full"
                      style="background: rgba(216,162,74,0.85);"></div>
             </div>
 
             {{-- Hero Rectangle --}}
-            <section class="mt-8 rounded-3xl border shadow-lg overflow-hidden"
+            <section class="mt-6 rounded-2xl border shadow-lg overflow-hidden"
                      style="background:{{ $CARD }}; border-color: rgba(47,93,70,0.16);">
 
-                {{-- Image Area - KEPT LARGE --}}
+                {{-- Image Area - No grey space --}}
                 <div class="border-b overflow-hidden"
                      style="border-color: rgba(47,93,70,0.12); background: rgba(47,93,70,0.06);">
                     <img
                         src="{{ asset('images/welcome-town.png') }}"
                         alt="Cozy town"
-                        class="block w-full h-72 md:h-96 object-cover"
+                        class="w-full h-auto block"
                     >
-                    <div class="-mt-12 h-12"
-                         style="background: linear-gradient(to top, rgba(47,93,70,0.18), rgba(47,93,70,0.00));">
-                    </div>
                 </div>
 
                 {{-- Mission Text --}}
-                <div class="p-8 md:p-10">
-                    <h1 class="text-3xl md:text-4xl font-extrabold" style="color:{{ $GREEN }};">
+                <div class="p-8">
+                    <h1 class="text-2xl font-extrabold" style="color:{{ $GREEN }};">
                         Welcome, Mayor. Your Town Awaits.
                     </h1>
 
-                    <p class="mt-4 text-lg"
-                       style="color: rgba(47,93,70,0.85);">
-                        Learn financial basics, track your spending, and earn coins to unlock and furnish your town.
+                    <p class="mt-3 text-base leading-relaxed" style="color: rgba(47,93,70,0.85);">
+                        Learn financial basics, track your spending and earn coins to unlock and furnish your town.
                         Every responsible choice helps your town grow stronger.
                     </p>
                 </div>
             </section>
 
             {{-- Buttons --}}
-            <div class="mt-8 flex flex-col items-center">
+            <div class="mt-6 flex flex-col items-center">
                 @auth
                     <a href="/dashboard"
-                       class="w-full md:w-auto md:min-w-[300px] inline-flex items-center justify-center px-10 py-4 rounded-2xl font-semibold transition hover:opacity-90 text-lg"
+                       class="w-full md:w-auto md:min-w-[280px] inline-flex items-center justify-center px-8 py-3 rounded-xl font-semibold transition hover:opacity-90"
                        style="background:{{ $GREEN }}; color:{{ $GOLD }};">
                         Go to Dashboard
                     </a>
                 @else
                     <a href="/login"
-                       class="w-full md:w-auto md:min-w-[300px] inline-flex items-center justify-center px-10 py-4 rounded-2xl font-semibold transition hover:opacity-90 text-lg"
+                       class="w-full md:w-auto md:min-w-[280px] inline-flex items-center justify-center px-8 py-3 rounded-xl font-semibold transition hover:opacity-90"
                        style="background:{{ $GREEN }}; color:{{ $GOLD }};">
                         Login
                     </a>
 
-                    <div class="mt-4 text-center text-base" style="color: rgba(47,93,70,0.78);">
+                    <div class="mt-3 text-center text-sm" style="color: rgba(47,93,70,0.78);">
                         New here?
                         <a href="/register"
-                           class="font-semibold underline underline-offset-4 text-lg"
+                           class="font-semibold underline underline-offset-4"
                            style="color:{{ $GOLD }};">
                             Register
                         </a>
@@ -109,7 +105,7 @@
                 @endauth
             </div>
 
-            <footer class="mt-10 text-center text-sm" style="color: rgba(47,93,70,0.75);">
+            <footer class="mt-8 text-center text-xs" style="color: rgba(47,93,70,0.75);">
                 © {{ date('Y') }} Bru<i>Save</i>
             </footer>
         </div>

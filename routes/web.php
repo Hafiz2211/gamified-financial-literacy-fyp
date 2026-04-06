@@ -79,6 +79,77 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
     
+    // Get current logged-in user for Godot
+    Route::get('/api/game/user', function (Request $request) {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type');
+        header('Access-Control-Allow-Credentials: true');
+        
+        if ($request->getMethod() === 'OPTIONS') {
+            return response('', 200);
+        }
+        
+        $user = auth()->user();
+        return response()->json([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email
+        ]);
+    })->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+    
+    // 🔴 ADDED: Save buildings to database
+    Route::post('/api/game/save', function (Request $request) {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type');
+        header('Access-Control-Allow-Credentials: true');
+        
+        if ($request->getMethod() === 'OPTIONS') {
+            return response('', 200);
+        }
+        
+        $userId = $request->input('user_id');
+        if (!$userId) {
+            return response()->json(['error' => 'No user_id'], 400);
+        }
+        
+        $user = \App\Models\User::find($userId);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+        
+        $user->buildings_data = json_encode($request->all());
+        $user->save();
+        
+        return response()->json(['success' => true]);
+    })->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+    
+    // 🔴 ADDED: Load buildings from database
+    Route::get('/api/game/load', function (Request $request) {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type');
+        header('Access-Control-Allow-Credentials: true');
+        
+        if ($request->getMethod() === 'OPTIONS') {
+            return response('', 200);
+        }
+        
+        $userId = $request->query('user_id');
+        if (!$userId) {
+            return response()->json(['error' => 'No user_id'], 400);
+        }
+        
+        $user = \App\Models\User::find($userId);
+        if (!$user || !$user->buildings_data) {
+            return response()->json(['buildings' => []]);
+        }
+        
+        return response()->json(json_decode($user->buildings_data, true));
+    })->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+    
+    // Update coins - uses user_id from request
     Route::post('/api/game/update', function (Request $request) {
         
         header('Access-Control-Allow-Origin: *');
@@ -90,7 +161,12 @@ Route::middleware(['auth'])->group(function () {
             return response('', 200);
         }
         
-        $user = auth()->user();
+        $userId = $request->input('user_id');
+        if ($userId) {
+            $user = \App\Models\User::find($userId);
+        } else {
+            $user = auth()->user();
+        }
         
         if ($request->has('coins')) $user->coins = $request->coins;
         if ($request->has('townLevel')) $user->town_level = $request->townLevel;
@@ -104,6 +180,7 @@ Route::middleware(['auth'])->group(function () {
         return response()->json(['success' => true, 'coins' => $user->coins]);
     })->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
     
+    // Load coins - uses user_id parameter
     Route::get('/api/game/coins', function (Request $request) {
         
         header('Access-Control-Allow-Origin: *');
@@ -115,7 +192,13 @@ Route::middleware(['auth'])->group(function () {
             return response('', 200);
         }
         
-        $user = auth()->user();
+        $userId = $request->query('user_id');
+        if ($userId) {
+            $user = \App\Models\User::find($userId);
+        } else {
+            $user = auth()->user();
+        }
+        
         return response()->json([
             'coins' => $user->coins,
             'level' => $user->level,
@@ -125,5 +208,5 @@ Route::middleware(['auth'])->group(function () {
             'stone' => $user->stone ?? 80,
             'food' => $user->food ?? 50
         ]);
-    });
+    })->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 });
