@@ -24,88 +24,76 @@
         $CARD = '#FFFBF2';
     @endphp
 
-    <main class="relative min-h-screen flex items-center justify-center px-6 py-8 overflow-hidden">
-        {{-- Soft cozy glow behind header --}}
+    <main class="relative min-h-screen px-6 py-6 overflow-hidden">
+        {{-- Soft cozy glow behind --}}
         <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-[320px] w-[640px] rounded-full blur-3xl opacity-20"
              style="background:{{ $GOLD }};"></div>
         <div class="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-[260px] w-[520px] rounded-full blur-3xl opacity-16"
              style="background:{{ $GREEN }};"></div>
 
-        <div class="w-full max-w-3xl">
-            {{-- Logo + Slogan --}}
-            <div class="text-center">
-                <img
-                    src="{{ asset('images/brusave-logo.png') }}"
-                    alt="BruSave logo"
-                    class="mx-auto h-14 w-auto object-contain"
-                >
-                <div class="mt-3 text-3xl font-extrabold leading-tight" style="color:{{ $GREEN }};">
-                    Bru<i>Save</i>
+        {{-- Top Bar with Logo (left) and Auth Buttons (right) --}}
+        <div class="flex items-center justify-between max-w-3xl mx-auto">
+            {{-- Logo Area --}}
+            <div class="flex items-center gap-3">
+                <img src="{{ asset('images/brusave-logo.png') }}" alt="BruSave logo" class="h-10 w-auto object-contain">
+                <div>
+                    <div class="text-2xl font-extrabold leading-tight" style="color:{{ $GREEN }};">
+                        Bru<i>Save</i>
+                    </div>
+                    <div class="text-xs font-semibold" style="color:{{ $GOLD }}; opacity:0.95;">
+                        Build Wealth, Build Your Town
+                    </div>
                 </div>
-
-                <div class="mt-1 text-sm font-semibold"
-                     style="color:{{ $GOLD }}; opacity:0.95;">
-                    Build Wealth, Build Your Town
-                </div>
-
-                <div class="mx-auto mt-3 h-1 w-14 rounded-full"
-                     style="background: rgba(216,162,74,0.85);"></div>
             </div>
 
-            {{-- Hero Rectangle --}}
-            <section class="mt-6 rounded-2xl border shadow-lg overflow-hidden"
-                     style="background:{{ $CARD }}; border-color: rgba(47,93,70,0.16);">
-
-                {{-- Image Area - No grey space --}}
-                <div class="border-b overflow-hidden"
-                     style="border-color: rgba(47,93,70,0.12); background: rgba(47,93,70,0.06);">
-                    <img
-                        src="{{ asset('images/welcome-town.png') }}"
-                        alt="Cozy town"
-                        class="w-full h-auto block"
-                    >
-                </div>
-
-                {{-- Mission Text --}}
-                <div class="p-8">
-                    <h1 class="text-2xl font-extrabold" style="color:{{ $GREEN }};">
-                        Welcome, Mayor. Your Town Awaits.
-                    </h1>
-
-                    <p class="mt-3 text-base leading-relaxed" style="color: rgba(47,93,70,0.85);">
-                        Learn financial basics, track your spending and earn coins to unlock and furnish your town.
-                        Every responsible choice helps your town grow stronger.
-                    </p>
-                </div>
-            </section>
-
-            {{-- Buttons --}}
-            <div class="mt-6 flex flex-col items-center">
+            {{-- Auth Buttons (Top Right Corner) --}}
+            <div>
                 @auth
                     <a href="/dashboard"
-                       class="w-full md:w-auto md:min-w-[280px] inline-flex items-center justify-center px-8 py-3 rounded-xl font-semibold transition hover:opacity-90"
+                       class="inline-flex items-center px-5 py-2 rounded-xl font-semibold transition hover:opacity-90"
                        style="background:{{ $GREEN }}; color:{{ $GOLD }};">
-                        Go to Dashboard
+                        Dashboard
                     </a>
                 @else
-                    <a href="/login"
-                       class="w-full md:w-auto md:min-w-[280px] inline-flex items-center justify-center px-8 py-3 rounded-xl font-semibold transition hover:opacity-90"
-                       style="background:{{ $GREEN }}; color:{{ $GOLD }};">
-                        Login
-                    </a>
-
-                    <div class="mt-3 text-center text-sm" style="color: rgba(47,93,70,0.78);">
-                        New here?
+                    <div class="flex items-center gap-3">
+                        <a href="/login"
+                           class="inline-flex items-center px-5 py-2 rounded-xl font-semibold transition hover:opacity-90"
+                           style="background:{{ $GREEN }}; color:{{ $GOLD }};">
+                            Login
+                        </a>
                         <a href="/register"
-                           class="font-semibold underline underline-offset-4"
-                           style="color:{{ $GOLD }};">
+                           class="inline-flex items-center px-5 py-2 rounded-xl font-semibold transition hover:opacity-90"
+                           style="background:rgba(47,93,70,0.1); color:{{ $GREEN }}; border:1px solid rgba(47,93,70,0.3);">
                             Register
                         </a>
                     </div>
                 @endauth
             </div>
+        </div>
 
-            <footer class="mt-8 text-center text-xs" style="color: rgba(47,93,70,0.75);">
+        {{-- Main Content - ONE WHITE CARD with title on top, image below (no extra frames) --}}
+        <div class="max-w-3xl mx-auto mt-10">
+            <div class="rounded-2xl border shadow-lg overflow-hidden"
+                 style="background:{{ $CARD }}; border-color: rgba(47,93,70,0.16);">
+                
+                {{-- Title and Description (top section of the card) --}}
+                <div class="p-8 pb-4 text-center">
+                    <h1 class="text-3xl md:text-4xl font-extrabold" style="color:{{ $GREEN }};">
+                        Welcome, Mayor
+                    </h1>
+                    <p class="mt-4 text-base leading-relaxed max-w-2xl mx-auto" style="color: rgba(47,93,70,0.85);">
+                        Learn financial basics, track your spending and earn coins to unlock and furnish your town. Every smart decision helps your town grow stronger.
+                    </p>
+                </div>
+
+                {{-- Hero Image - directly below, touching edges of card, no extra frame --}}
+                <div>
+                    <img src="{{ asset('images/welcome-town.png') }}" alt="Cozy town" class="w-full h-auto block">
+                </div>
+            </div>
+
+            {{-- Footer --}}
+            <footer class="mt-10 text-center text-xs" style="color: rgba(47,93,70,0.75);">
                 © {{ date('Y') }} Bru<i>Save</i>
             </footer>
         </div>

@@ -24,9 +24,9 @@
     $GOLD = '#D8A24A';
     $CARD = '#FFFBF2';
     
-    // Prepare daily data
+    // Prepare daily data - now using day numbers (1-31)
     $dailyData = $dailyData ?? [];
-    $dailyLabels = !empty($dailyData) ? array_keys($dailyData) : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    $dailyLabels = !empty($dailyData) ? array_keys($dailyData) : [1, 2, 3, 4, 5, 6, 7];
     $dailyValues = !empty($dailyData) ? array_values($dailyData) : [0, 0, 0, 0, 0, 0, 0];
     
     // Default values for summary cards
@@ -139,6 +139,9 @@
                 </div>
             </div>
         </div>
+        <footer class="text-center text-xs pt-8 pb-2" style="color: rgba(47,93,70,0.75); margin-top: 40px;">
+            © {{ date('Y') }} Bru<i>Save</i>
+        </footer>
     </main>
 </div>
 
@@ -158,17 +161,22 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     @endif
 
-    // Daily Trend Chart
+    // Daily Trend Chart - X-AXIS shows ONLY 10, 20, 30
     new Chart(document.getElementById('trendChart'), {
         type: 'line',
         data: {
             labels: {!! json_encode($dailyLabels) !!},
             datasets: [{
-                label: 'Spending',
+                label: 'Spending (B$)',
                 data: {!! json_encode($dailyValues) !!},
                 borderColor: '#2F5D46',
+                backgroundColor: 'rgba(47,93,70,0.05)',
                 tension: 0.3,
-                fill: false
+                fill: true,
+                pointBackgroundColor: '#D8A24A',
+                pointBorderColor: '#2F5D46',
+                pointRadius: 3,
+                pointHoverRadius: 5
             }]
         },
         options: {
@@ -177,13 +185,35 @@ document.addEventListener('DOMContentLoaded', function() {
             scales: {
                 y: {
                     beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Amount (B$)',
+                        color: '#2F5D46'
+                    },
                     grid: {
                         color: 'rgba(47,93,70,0.1)'
                     }
                 },
                 x: {
+                    title: {
+                        display: true,
+                        text: 'Day of Month',
+                        color: '#2F5D46'
+                    },
                     grid: {
                         display: false
+                    },
+                    ticks: {
+                        autoSkip: true,
+                        maxRotation: 0,
+                        callback: function(val, index) {
+                            // 🔴 FIXED: Only show 10, 20, 30
+                            const day = Number(val);
+                            if (day === 10 || day === 20 || day === 30) {
+                                return day;
+                            }
+                            return '';
+                        }
                     }
                 }
             },
@@ -194,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return 'B$' + context.parsed.y.toFixed(2);
+                            return 'Day ' + context.label + ': B$' + context.parsed.y.toFixed(2);
                         }
                     }
                 }
@@ -255,5 +285,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+    @include('partials.music')
 </body>
 </html>

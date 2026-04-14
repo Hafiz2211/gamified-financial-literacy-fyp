@@ -143,7 +143,7 @@
             <section class="mt-10">
                 <h1 class="text-3xl md:text-4xl font-extrabold" style="color:{{ $GREEN }};">Track Spending</h1>
                 <p class="mt-2" style="color: rgba(47,93,70,0.82);">
-                    Add your daily income and expenses. First 10 records daily = 10 XP + 10 coins each. Extra records = 1 XP + 1 coin. Resets every day at midnight!
+                    Keep track of your daily income and expenses to stay in control of your finances. Earn XP and coins as you record your spending — the first 10 entries each day give 10 XP and 10 🪙 each, with smaller rewards after. Resets daily, so you can start fresh each day.
                 </p>
             </section>
 
@@ -697,5 +697,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(updateStats, 30000);
 });
 </script>
+    @include('partials.music')
 </body>
 </html>

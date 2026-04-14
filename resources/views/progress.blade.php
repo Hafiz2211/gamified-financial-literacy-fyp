@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes">
     <title>My Room • BruSave</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -39,7 +39,6 @@
             background: #F6F1E6;
         }
         
-        /* Pixel-perfect rendering */
         .pixel img {
             image-rendering: pixelated;
             image-rendering: crisp-edges;
@@ -50,7 +49,6 @@
             height: auto;
         }
         
-        /* Room container */
         .room-container {
             position: relative;
             width: 980px;
@@ -62,7 +60,6 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
         
-        /* Furniture items - only shown when owned */
         .furniture-item {
             position: absolute;
             display: none;
@@ -106,7 +103,6 @@
             max-height: 250px;
         }
 
-        /* Tooltip - simplified */
         .tooltip-tag {
             position: absolute;
             left: 50%;
@@ -124,7 +120,6 @@
             border: 1px solid #D8A24A;
         }
         
-        /* Furniture shop items */
         .shop-item {
             transition: all 0.2s ease;
             cursor: pointer;
@@ -179,7 +174,6 @@
             filter: grayscale(100%) opacity(0.5);
         }
         
-        /* Grid guide */
         .grid-guide {
             position: absolute;
             inset: 0;
@@ -207,6 +201,117 @@
         }
         .level-up-notification {
             animation: slideIn 0.3s ease-out;
+        }
+        
+        .section-header {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 16px 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(216,162,74,0.3);
+        }
+        
+        /* Mobile Warning - only shows on phones */
+        .desktop-only-banner {
+            display: none;
+        }
+        
+        /* ========== MOBILE RESPONSIVE CSS ========== */
+        @media (max-width: 768px) {
+            .desktop-only-banner {
+                display: block;
+            }
+            
+            .room-container {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 980 / 520;
+                transform: scale(0.95);
+            }
+            
+            .furniture-item img {
+                max-width: 45px !important;
+                max-height: 45px !important;
+            }
+            
+            .furniture-item.small img {
+                max-width: 30px !important;
+                max-height: 30px !important;
+            }
+            
+            .furniture-item.medium img {
+                max-width: 40px !important;
+                max-height: 40px !important;
+            }
+            
+            .furniture-item.large img {
+                max-width: 55px !important;
+                max-height: 55px !important;
+            }
+            
+            .shop-preview img {
+                max-height: 35px;
+            }
+            
+            .grid-cols-1.md\:grid-cols-5 {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
+            
+            .shop-item {
+                padding: 8px;
+            }
+            
+            .shop-item .font-bold.text-sm {
+                font-size: 11px;
+            }
+            
+            .shop-item .text-xs {
+                font-size: 9px;
+            }
+            
+            .shop-item .text-lg.font-bold {
+                font-size: 14px;
+            }
+            
+            .text-2xl.font-extrabold {
+                font-size: 1.25rem;
+            }
+            
+            .flex.gap-6 {
+                gap: 12px;
+            }
+            
+            .p-6 {
+                padding: 1rem;
+            }
+            
+            .section-header {
+                font-size: 11px;
+            }
+            
+            .text-sm {
+                font-size: 10px;
+            }
+            
+            .rounded-3xl {
+                border-radius: 16px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .room-container {
+                transform: scale(0.9);
+            }
+            
+            .furniture-item img {
+                max-width: 35px !important;
+                max-height: 35px !important;
+            }
+            
+            .grid-cols-1.md\:grid-cols-5 {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
         }
     </style>
 </head>
@@ -257,6 +362,7 @@
     $BG = '#F6F1E6';
     $CARD = '#FFFBF2';
     $active = 'progress';
+    $isPremium = $user->isPremium();
     
     $nav = [
         ['key'=>'dashboard','label'=>'Dashboard','href'=>'/dashboard','icon'=>'🏠'],
@@ -273,8 +379,7 @@
     $coins = $user->coins ?? 0;
     $xp = $user->xp ?? 0;
     
-    // 🔴 FIXED: XP calculation matching dashboard
-    // Define XP thresholds
+    // XP thresholds
     $levelThresholds = [
         1 => 0,
         2 => 300,
@@ -288,10 +393,8 @@
         10 => 6300,
     ];
 
-    // Get threshold for current level
+    // Calculate XP progress
     $currentLevelThreshold = $levelThresholds[$level];
-
-    // Calculate XP needed for next level
     if ($level < 10) {
         $nextLevelThreshold = $levelThresholds[$level + 1];
         $xpNeededForNextLevel = $nextLevelThreshold - $currentLevelThreshold;
@@ -302,15 +405,11 @@
         $xpInCurrentLevel = $xp - $currentLevelThreshold;
         $nextLevel = $level;
     }
-
-    // Progress percentage
     $xpProgress = $xpNeededForNextLevel > 0 ? ($xpInCurrentLevel / $xpNeededForNextLevel) * 100 : 100;
     $xpProgress = min(100, max(0, $xpProgress));
-
-    // Display text for the XP bar
     $xpDisplay = $xpInCurrentLevel . '/' . $xpNeededForNextLevel . ' XP to Level ' . $nextLevel;
     
-    // Determine title based on level
+    // Title based on level
     if ($level <= 2) {
         $title = 'New Mayor';
     } elseif ($level <= 4) {
@@ -321,69 +420,208 @@
         $title = 'Legendary Mayor';
     }
     
-    // Get user stats from database
+    // Get user stats from database with correct limits
+    $totalLessons = \App\Models\Lesson::count();
     $completedLessons = $user->lessons()->count() ?? 0;
-    $totalLessons = 6;
     
+    // Premium lessons completed - auto detect from database
+    $premiumLessonIds = \App\Models\Lesson::where('is_premium', true)->pluck('id')->toArray();
+    $completedPremiumLessons = $user->lessons()->whereIn('lesson_id', $premiumLessonIds)->count() ?? 0;
+    
+    $totalQuizzes = \App\Models\Quiz::count();
     $passedQuizzes = $user->quizAttempts()
         ->where('passed', true)
         ->distinct('quiz_id')
         ->count('quiz_id') ?? 0;
     
+    // Premium quizzes passed - auto detect from database
+    $premiumQuizIds = \App\Models\Quiz::where('is_premium', true)->pluck('id')->toArray();
+    $passedPremiumQuizzes = $user->quizAttempts()
+        ->where('passed', true)
+        ->whereIn('quiz_id', $premiumQuizIds)
+        ->distinct('quiz_id')
+        ->count('quiz_id') ?? 0;
+    
     $spendingRecords = $user->transactions()->count() ?? 0;
     
-    // Achievements with image paths
-    $achievements = [
+    // 🎯 FURNITURE SYSTEM
+    
+    // 🟢 FREE (Starter Room)
+    $freeFurniture = [
         'plant' => [
             'name' => 'Potted Plant',
             'image' => asset('images/room/plant.png'),
             'condition' => $completedLessons >= 1,
-            'requirement' => 'Complete 1 Lesson',
-            'price' => 50,
-            'unlocked' => $completedLessons >= 1
+            'requirement' => 'Complete 1 lesson',
+            'price' => 40,
+            'unlocked' => $completedLessons >= 1,
+            'category' => 'free',
+            'size' => 'small',
+            'defaultPos' => ['left' => 60, 'top' => 350, 'width' => 80],
+            'z' => 10
         ],
         'chair' => [
             'name' => 'Study Chair',
             'image' => asset('images/room/chair.png'),
-            'condition' => $spendingRecords >= 10,
-            'requirement' => 'Add 10 Spending Records',
-            'price' => 100,
-            'unlocked' => $spendingRecords >= 10
+            'condition' => $spendingRecords >= 5,
+            'requirement' => 'Add 5 spending records',
+            'price' => 60,
+            'unlocked' => $spendingRecords >= 5,
+            'category' => 'free',
+            'size' => 'small',
+            'defaultPos' => ['left' => 450, 'top' => 280, 'width' => 120],
+            'z' => 30
+        ],
+        'picture' => [
+            'name' => 'Wall Picture',
+            'image' => asset('images/room/picture.png'),
+            'condition' => $level >= 2,
+            'requirement' => 'Reach Level 2',
+            'price' => 80,
+            'unlocked' => $level >= 2,
+            'category' => 'free',
+            'size' => 'small',
+            'defaultPos' => ['left' => 800, 'top' => 80, 'width' => 60],
+            'z' => 15
         ],
         'desk' => [
             'name' => 'Study Desk',
             'image' => asset('images/room/desk.png'),
             'condition' => $passedQuizzes >= 1,
-            'requirement' => 'Pass Quiz Level 1',
-            'price' => 150,
-            'unlocked' => $passedQuizzes >= 1
+            'requirement' => 'Pass 1 quiz',
+            'price' => 120,
+            'unlocked' => $passedQuizzes >= 1,
+            'category' => 'free',
+            'size' => 'medium',
+            'defaultPos' => ['left' => 600, 'top' => 150, 'width' => 200],
+            'z' => 25
         ],
         'bed' => [
             'name' => 'Comfy Bed',
             'image' => asset('images/room/bed.png'),
             'condition' => $level >= 3,
             'requirement' => 'Reach Level 3',
-            'price' => 250,
-            'unlocked' => $level >= 3
-        ],
-        'wardrobe' => [
-            'name' => 'Storage Wardrobe',
-            'image' => asset('images/room/wardrobe.png'),
-            'condition' => $passedQuizzes >= 3,
-            'requirement' => 'Pass Quiz Level 3',
-            'price' => 300,
-            'unlocked' => $passedQuizzes >= 3
+            'price' => 180,
+            'unlocked' => $level >= 3,
+            'category' => 'free',
+            'size' => 'medium',
+            'defaultPos' => ['left' => 700, 'top' => 300, 'width' => 220],
+            'z' => 35
         ],
     ];
+    
+    // 🟡 PREMIUM (Simple Unlock)
+    $premiumFurniture = [
+        'window' => [
+            'name' => 'Window',
+            'image' => asset('images/room/window.png'),
+            'condition' => $isPremium,
+            'requirement' => 'Premium member',
+            'price' => 200,
+            'unlocked' => $isPremium,
+            'category' => 'premium',
+            'size' => 'medium',
+            'defaultPos' => ['left' => 300, 'top' => 50, 'width' => 150],
+            'z' => 5
+        ],
+        'clock' => [
+            'name' => 'Wall Clock',
+            'image' => asset('images/room/clock.png'),
+            'condition' => $isPremium,
+            'requirement' => 'Premium member',
+            'price' => 120,
+            'unlocked' => $isPremium,
+            'category' => 'premium',
+            'size' => 'small',
+            'defaultPos' => ['left' => 500, 'top' => 60, 'width' => 60],
+            'z' => 15
+        ],
+    ];
+    
+    // 🔴 PREMIUM ACHIEVEMENT (Main System) - REMOVED makeuptable
+    $premiumAchievementFurniture = [
+        'bookcase' => [
+            'name' => 'Bookcase',
+            'image' => asset('images/room/bookcase.png'),
+            'condition' => $completedPremiumLessons >= 2 && $isPremium,
+            'requirement' => 'Complete 2 premium lessons',
+            'price' => 220,
+            'unlocked' => $completedPremiumLessons >= 2 && $isPremium,
+            'category' => 'premium_achievement',
+            'size' => 'large',
+            'defaultPos' => ['left' => 50, 'top' => 150, 'width' => 120],
+            'z' => 20
+        ],
+        'laptop' => [
+            'name' => 'Laptop',
+            'image' => asset('images/room/laptop.png'),
+            'condition' => $passedPremiumQuizzes >= 1 && $isPremium,
+            'requirement' => 'Pass 1 premium quiz',
+            'price' => 250,
+            'unlocked' => $passedPremiumQuizzes >= 1 && $isPremium,
+            'category' => 'premium_achievement',
+            'size' => 'small',
+            'defaultPos' => ['left' => 650, 'top' => 220, 'width' => 80],
+            'z' => 40
+        ],
+        'carpet' => [
+            'name' => 'Carpet',
+            'image' => asset('images/room/carpet.png'),
+            'condition' => $spendingRecords >= 30 && $isPremium,
+            'requirement' => 'Track 30 spending records + Premium',
+            'price' => 150,
+            'unlocked' => $spendingRecords >= 30 && $isPremium,
+            'category' => 'premium_achievement',
+            'size' => 'large',
+            'defaultPos' => ['left' => 300, 'top' => 350, 'width' => 300],
+            'z' => 1
+        ],
+        'lamp' => [
+            'name' => 'Stand Lamp',
+            'image' => asset('images/room/bedroom lamp.png'),
+            'condition' => $level >= 5 && $isPremium,
+            'requirement' => 'Reach Level 5 + Premium',
+            'price' => 180,
+            'unlocked' => $level >= 5 && $isPremium,
+            'category' => 'premium_achievement',
+            'size' => 'small',
+            'defaultPos' => ['left' => 850, 'top' => 250, 'width' => 50],
+            'z' => 20
+        ],
+        'drawer' => [
+            'name' => 'Drawer',
+            'image' => asset('images/room/drawer.png'),
+            'condition' => $passedPremiumQuizzes >= 3 && $isPremium,
+            'requirement' => 'Pass ALL premium quizzes (3)',
+            'price' => 160,
+            'unlocked' => $passedPremiumQuizzes >= 3 && $isPremium,
+            'category' => 'premium_achievement',
+            'size' => 'medium',
+            'defaultPos' => ['left' => 200, 'top' => 380, 'width' => 100],
+            'z' => 20
+        ],
+        'wardrobe' => [
+            'name' => 'Wardrobe',
+            'image' => asset('images/room/wardrobe.png'),
+            'condition' => $completedPremiumLessons >= 6 && $isPremium,
+            'requirement' => 'Complete ALL premium lessons (6)',
+            'price' => 280,
+            'unlocked' => $completedPremiumLessons >= 6 && $isPremium,
+            'category' => 'premium_achievement',
+            'size' => 'large',
+            'defaultPos' => ['left' => 100, 'top' => 80, 'width' => 200],
+            'z' => 20
+        ],
+    ];
+    
+    // Merge all furniture
+    $allFurniture = array_merge($freeFurniture, $premiumFurniture, $premiumAchievementFurniture);
 @endphp
 
 <div class="app-container">
-    {{-- Sidebar --}}
     @include('partials.sidebar', ['nav' => $nav, 'active' => $active, 'GREEN' => $GREEN, 'GOLD' => $GOLD])
 
-    {{-- Main content --}}
     <div class="main-content">
-        {{-- Profile dropdown --}}
         <div style="display: flex; justify-content: flex-end; padding: 20px 24px 0;">
             @include('components.profile-dropdown', ['user' => auth()->user()])
         </div>
@@ -399,7 +637,8 @@
                             {{ $userName }}'s Home
                         </div>
                          <p class="mt-2 text-sm" style="color: rgba(47,93,70,0.8);">
-                            Unlock furniture by completing lessons, quizzes and track spending. Decorate your home and show off your achievements!
+                            Unlock furniture by completing lessons, quizzes and tracking your spending. 
+                            <strong>Premium users unlock exclusive items, but must still earn them through achievement!</strong>
                          </p>
                     </div>
 
@@ -428,14 +667,20 @@
             </section>
 
             {{-- QUICK STATS --}}
-            <section class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <section class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                 <div class="rounded-2xl border p-4" style="background:{{ $CARD }};">
                     <div class="text-xs" style="color: rgba(47,93,70,0.65);">📚 Lessons</div>
                     <div class="text-xl font-bold" style="color:{{ $GREEN }};">{{ $completedLessons }}/{{ $totalLessons }}</div>
+                    @if($completedPremiumLessons > 0)
+                        <div class="text-xs" style="color:{{ $GOLD }};">({{ $completedPremiumLessons }}/6 premium)</div>
+                    @endif
                 </div>
                 <div class="rounded-2xl border p-4" style="background:{{ $CARD }};">
                     <div class="text-xs" style="color: rgba(47,93,70,0.65);">📝 Quizzes Passed</div>
-                    <div class="text-xl font-bold" style="color:{{ $GREEN }};">{{ $passedQuizzes }}/3</div>
+                    <div class="text-xl font-bold" style="color:{{ $GREEN }};">{{ $passedQuizzes }}/{{ $totalQuizzes }}</div>
+                    @if($passedPremiumQuizzes > 0)
+                        <div class="text-xs" style="color:{{ $GOLD }};">({{ $passedPremiumQuizzes }}/3 premium)</div>
+                    @endif
                 </div>
                 <div class="rounded-2xl border p-4" style="background:{{ $CARD }};">
                     <div class="text-xs" style="color: rgba(47,93,70,0.65);">💰 Spending Records</div>
@@ -447,18 +692,34 @@
                 </div>
             </section>
 
-            {{-- FURNITURE SHOP WITH IMAGES --}}
-            <section class="mt-8 rounded-3xl border shadow-lg p-6"
-                     style="background:{{ $CARD }}; border-color: rgba(47,93,70,0.16);">
-                <div class="flex justify-between items-center mb-6">
+            {{-- 🔴 MOBILE WARNING BANNER (Only visible on phones) --}}
+            <div class="desktop-only-banner mb-3 p-3 rounded-xl text-center" style="background: rgba(216,162,74,0.12); border: 1px solid {{ $GOLD }};">
+                <p style="color: {{ $GOLD }}; font-size: 12px; margin: 0;">
+                    💡 <strong>Tip:</strong> For the best room decorating experience, use a <strong>laptop or desktop</strong>. 
+                    Drag and drop works best with a mouse. Mobile version will be implemented in a future update.
+                </p>
+            </div>
+
+            {{-- 🔴 COMING SOON BANNER (Above Furniture Shop) --}}
+            <div class="p-3 rounded-xl text-center" style="background: rgba(47,93,70,0.08); border: 1px dashed {{ $GOLD }}; margin-bottom: 25px;">
+                <p style="color: {{ $GREEN }}; font-size: 13px; margin: 0;">
+                    🏠 <strong>Coming Soon!</strong> Kitchen and Living Room decorations will be available in a future update. Stay tuned! ✨
+                </p>
+            </div>
+
+            {{-- FURNITURE SHOP WITH SECTIONS --}}
+            <section class="rounded-3xl border shadow-lg p-6" style="background:{{ $CARD }}; border-color: rgba(47,93,70,0.16); margin-top: 20px;">
+                <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold" style="color:{{ $GREEN }};">🛒 Furniture Shop</h2>
                     <div class="text-sm" style="color: rgba(47,93,70,0.7);">
                         Press <kbd style="background: #2F5D46; color: #D8A24A; padding: 2px 6px; border-radius: 4px;">G</kbd> for grid
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    @foreach($achievements as $key => $item)
+                {{-- 🟢 FREE SECTION --}}
+                <div class="section-header" style="color:{{ $GREEN }};">🟢 Starter Furniture</div>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+                    @foreach($freeFurniture as $key => $item)
                         <div class="shop-item border text-center" 
                              data-id="{{ $key }}"
                              data-price="{{ $item['price'] }}"
@@ -488,6 +749,74 @@
                         </div>
                     @endforeach
                 </div>
+                
+                {{-- 🟡 PREMIUM SECTION --}}
+                <div class="section-header" style="color:{{ $GOLD }};">🟡 Premium Collection</div>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+                    @foreach($premiumFurniture as $key => $item)
+                        <div class="shop-item border text-center" 
+                             data-id="{{ $key }}"
+                             data-price="{{ $item['price'] }}"
+                             data-name="{{ $item['name'] }}"
+                             data-unlocked="{{ $item['condition'] ? 'true' : 'false' }}"
+                             style="border-color: {{ $item['condition'] ? 'rgba(216,162,74,0.4)' : 'rgba(47,93,70,0.16)' }};
+                                    background: {{ $item['condition'] ? 'rgba(216,162,74,0.05)' : 'rgba(47,93,70,0.02)' }};">
+                            
+                            <div class="shop-preview">
+                                <img src="{{ $item['image'] }}" 
+                                     alt="{{ $item['name'] }}"
+                                     style="{{ !$item['condition'] ? 'filter: grayscale(100%) opacity(0.5);' : '' }}">
+                            </div>
+                            
+                            <div class="font-bold text-sm" style="color:{{ $GREEN }};">{{ $item['name'] }}</div>
+                            <div class="text-xs mt-1" style="color: rgba(47,93,70,0.65);">{{ $item['requirement'] }}</div>
+                            <div class="text-lg font-bold mt-2" style="color:{{ $GOLD }};">{{ $item['price'] }} 🪙</div>
+                            <div class="text-xs mt-2 requirement-text">
+                                @if(!$item['condition'])
+                                    <span style="color: #b43c3c;">🔒 Premium Required</span>
+                                @elseif($coins < $item['price'])
+                                    <span style="color: {{ $GOLD }};">💰 Need coins</span>
+                                @else
+                                    <span style="color: {{ $GREEN }};">✅ Buy</span>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                
+                {{-- 🔴 PREMIUM ACHIEVEMENT SECTION --}}
+                <div class="section-header" style="color:{{ $GOLD }};">🔴 Advanced Collection</div>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    @foreach($premiumAchievementFurniture as $key => $item)
+                        <div class="shop-item border text-center" 
+                             data-id="{{ $key }}"
+                             data-price="{{ $item['price'] }}"
+                             data-name="{{ $item['name'] }}"
+                             data-unlocked="{{ $item['condition'] ? 'true' : 'false' }}"
+                             style="border-color: {{ $item['condition'] ? 'rgba(216,162,74,0.4)' : 'rgba(47,93,70,0.16)' }};
+                                    background: {{ $item['condition'] ? 'rgba(216,162,74,0.05)' : 'rgba(47,93,70,0.02)' }};">
+                            
+                            <div class="shop-preview">
+                                <img src="{{ $item['image'] }}" 
+                                     alt="{{ $item['name'] }}"
+                                     style="{{ !$item['condition'] ? 'filter: grayscale(100%) opacity(0.5);' : '' }}">
+                            </div>
+                            
+                            <div class="font-bold text-sm" style="color:{{ $GREEN }};">{{ $item['name'] }}</div>
+                            <div class="text-xs mt-1" style="color: rgba(47,93,70,0.65);">{{ $item['requirement'] }}</div>
+                            <div class="text-lg font-bold mt-2" style="color:{{ $GOLD }};">{{ $item['price'] }} 🪙</div>
+                            <div class="text-xs mt-2 requirement-text">
+                                @if(!$item['condition'])
+                                    <span style="color: #b43c3c;">🔒 Premium + Achievement</span>
+                                @elseif($coins < $item['price'])
+                                    <span style="color: {{ $GOLD }};">💰 Need coins</span>
+                                @else
+                                    <span style="color: {{ $GREEN }};">✅ Buy</span>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </section>
 
             {{-- ROOM CANVAS --}}
@@ -507,26 +836,19 @@
                 </div>
 
                 <div class="room-container">
-                    {{-- Background image --}}
-                    <img
-                        src="{{ asset('images/room/room.png') }}"
-                        alt="Empty room"
-                        class="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
-                        onerror="this.style.display='none';"
-                    >
-
+                    <img src="{{ asset('images/room/room.png') }}" alt="Empty room" class="absolute inset-0 w-full h-full object-cover pointer-events-none select-none" onerror="this.style.display='none';">
                     <div id="gridGuide" class="grid-guide">
                         @for($i = 0; $i < 96; $i++)
                             <div class="grid-cell"></div>
                         @endfor
                     </div>
-
                     <div id="furnitureLayer" class="absolute inset-0"></div>
                 </div>
             </section>
 
             <footer class="text-center text-xs pt-8 pb-2" style="color: rgba(47,93,70,0.75);">
-                © {{ date('Y') }} Bru<i>Save</i> 
+                © {{ date('Y') }} Bru<i>Save</i> &nbsp;|&nbsp;
+                Pixel World assets by <a href="https://bitglow.itch.io/pixel-world-complete-pack-pixel-art-assets" target="_blank" style="color: {{ $GOLD }}; text-decoration: none;">bitglow (itch.io)</a>
             </footer>
         </div>
     </div>
@@ -534,50 +856,83 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Get current user ID
     const userId = {{ $user->id }};
-    
-    // User data
     let coins = Number(@json($coins));
-    const level = Number(@json($level));
-    const achievements = @json($achievements);
+    const isPremium = @json($isPremium);
     
-    // Storage keys per user
-    const STORAGE_OWNED = `brusave.room.owned.${userId}`;
-    const STORAGE_POSITIONS = `brusave.room.positions.${userId}`;
+    // Load from DATABASE
+    let owned = new Set();
+    let savedPositions = {};
     
-    // Load owned furniture
-    const loadOwned = () => {
+    // Load from database via API
+    async function loadFromDatabase() {
+        try {
+            const response = await fetch('/furniture/load');
+            const data = await response.json();
+            owned = new Set(data.owned || []);
+            savedPositions = data.positions || {};
+            render();
+            updateShopItems();
+        } catch (error) {
+            console.error('Error loading furniture:', error);
+            loadFromLocalStorage();
+        }
+    }
+    
+    // Fallback to localStorage
+    function loadFromLocalStorage() {
+        const STORAGE_OWNED = `brusave.room.owned.${userId}`;
+        const STORAGE_POSITIONS = `brusave.room.positions.${userId}`;
         try {
             const raw = localStorage.getItem(STORAGE_OWNED);
-            return raw ? new Set(JSON.parse(raw)) : new Set();
+            owned = raw ? new Set(JSON.parse(raw)) : new Set();
+            const rawPos = localStorage.getItem(STORAGE_POSITIONS);
+            savedPositions = rawPos ? JSON.parse(rawPos) : {};
+            render();
+            updateShopItems();
         } catch (e) {
-            return new Set();
+            owned = new Set();
+            savedPositions = {};
         }
-    };
+    }
     
-    // Load saved positions
-    const loadPositions = () => {
+    // Save to database
+    async function saveToDatabase() {
         try {
-            const raw = localStorage.getItem(STORAGE_POSITIONS);
-            return raw ? JSON.parse(raw) : {};
-        } catch (e) {
-            return {};
+            await fetch('/furniture/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    owned: [...owned],
+                    positions: savedPositions
+                })
+            });
+        } catch (error) {
+            console.error('Error saving to database:', error);
+            saveToLocalStorage();
         }
-    };
+    }
     
-    // Save data
-    const saveOwned = (set) => {
-        localStorage.setItem(STORAGE_OWNED, JSON.stringify([...set]));
-    };
+    function saveToLocalStorage() {
+        const STORAGE_OWNED = `brusave.room.owned.${userId}`;
+        const STORAGE_POSITIONS = `brusave.room.positions.${userId}`;
+        localStorage.setItem(STORAGE_OWNED, JSON.stringify([...owned]));
+        localStorage.setItem(STORAGE_POSITIONS, JSON.stringify(savedPositions));
+    }
     
-    const savePositions = (positions) => {
-        localStorage.setItem(STORAGE_POSITIONS, JSON.stringify(positions));
-    };
-    
-    // State
-    let owned = loadOwned();
-    let savedPositions = loadPositions();
+    // Save positions when leaving the page
+    window.addEventListener('beforeunload', () => {
+        if (Object.keys(savedPositions).length > 0 || owned.size > 0) {
+            const data = JSON.stringify({
+                owned: [...owned],
+                positions: savedPositions
+            });
+            navigator.sendBeacon('/furniture/save', data);
+        }
+    });
     
     // DOM elements
     const coinDisplay = document.getElementById('coinDisplay');
@@ -609,66 +964,17 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCoinDisplay();
     
     // Furniture definitions with default positions
-    const items = [
-        {
-            id:'plant',
-            name:'Potted Plant',
-            src:"{{ asset('images/room/plant.png') }}",
-            price:50,
-            size: 'small',
-            reqAchievement: 'plant',
-            defaultPos: { left: 60, top: 350, width: 80 },   
-            z: 10
-        },
-        {
-            id:'chair',
-            name:'Study Chair',
-            src:"{{ asset('images/room/chair.png') }}",
-            price:100,
-            size: 'small',
-            reqAchievement: 'chair',
-            defaultPos: { left: 450, top: 280, width: 120 },
-            z: 30
-        },
-        {
-            id:'desk',
-            name:'Study Desk',
-            src:"{{ asset('images/room/desk.png') }}",
-            price:150,
-            size: 'medium',
-            reqAchievement: 'desk',
-            defaultPos: { left: 600, top: 150, width: 200 },
-            z: 25
-        },
-        {
-            id:'bed',
-            name:'Comfy Bed',
-            src:"{{ asset('images/room/bed.png') }}",
-            price:250,
-            size: 'medium',
-            reqAchievement: 'bed',
-            defaultPos: { left: 700, top: 300, width: 220 },
-            z: 35
-        },
-        {
-            id:'wardrobe',
-            name:'Storage Wardrobe',
-            src:"{{ asset('images/room/wardrobe.png') }}",
-            price:300,
-            size: 'large',
-            reqAchievement: 'wardrobe',
-            defaultPos: { left: 100, top: 80, width: 200 }, 
-            z: 20
-        },
-    ];
-
-    function createTooltip(text) {
-        const tooltip = document.createElement('div');
-        tooltip.className = 'tooltip-tag';
-        tooltip.textContent = text;
-        return tooltip;
-    }
-
+    const items = @json($allFurniture);
+    const itemsList = Object.entries(items).map(([id, data]) => ({
+        id: id,
+        name: data.name,
+        src: data.image,
+        price: data.price,
+        size: data.size,
+        defaultPos: data.defaultPos,
+        z: data.z
+    }));
+    
     // Drag and drop
     function makeDraggable(element, itemId) {
         let isDragging = false;
@@ -676,13 +982,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const onMouseMove = (e) => {
             if (!isDragging) return;
-            
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
-            
             const newLeft = Math.max(0, Math.min(980 - element.offsetWidth, startLeft + dx));
             const newTop = Math.max(0, Math.min(520 - element.offsetHeight, startTop + dy));
-            
             element.style.left = newLeft + 'px';
             element.style.top = newTop + 'px';
         };
@@ -693,64 +996,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 element.classList.remove('dragging');
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
-                
                 const pos = {
                     left: parseInt(element.style.left),
                     top: parseInt(element.style.top),
                     width: parseInt(element.style.width)
                 };
                 savedPositions[itemId] = pos;
-                savePositions(savedPositions);
+                saveToDatabase();
             }
         };
         
         element.addEventListener('mousedown', (e) => {
             if (!owned.has(itemId)) return;
-            
             e.preventDefault();
             isDragging = true;
             element.classList.add('dragging');
-            
             startX = e.clientX;
             startY = e.clientY;
             startLeft = parseInt(element.style.left) || 0;
             startTop = parseInt(element.style.top) || 0;
-            
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
         });
     }
-
-    // Render furniture
+    
+    // 🔴 FIXED: Render furniture with proper position loading
     function render() {
         layer.innerHTML = '';
-
-        items.forEach(item => {
+        
+        console.log('Rendering with positions:', savedPositions);
+        
+        itemsList.forEach(item => {
             if (!owned.has(item.id)) return;
             
-            const pos = savedPositions[item.id] || item.defaultPos;
+            let pos = savedPositions[item.id];
+            if (!pos || typeof pos !== 'object') {
+                pos = item.defaultPos;
+            }
+            if (!pos.left) pos.left = item.defaultPos.left;
+            if (!pos.top) pos.top = item.defaultPos.top;
+            if (!pos.width) pos.width = item.defaultPos.width;
+            
+            console.log('Rendering', item.id, 'at', pos);
             
             const wrap = document.createElement('div');
             wrap.className = 'furniture-item owned';
-            if (item.size) {
-                wrap.classList.add(item.size);
-            }
+            if (item.size) wrap.classList.add(item.size);
             wrap.style.left = pos.left + 'px';
             wrap.style.top = pos.top + 'px';
             wrap.style.width = pos.width + 'px';
             wrap.style.height = 'auto';
             wrap.style.zIndex = String(100 + (item.z ?? 20));
             wrap.setAttribute('data-id', item.id);
-
+            
             const img = document.createElement('img');
             img.src = item.src;
             img.alt = item.name;
             img.draggable = false;
             
             wrap.appendChild(img);
-            
             makeDraggable(wrap, item.id);
-
             layer.appendChild(wrap);
         });
         
@@ -760,10 +1065,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             instruction.textContent = 'Drag furniture anywhere to arrange your cozy room!';
         }
-        
         updateShopItems();
     }
-
+    
     // Handle shop purchases
     document.querySelectorAll('.shop-item').forEach(shopItem => {
         shopItem.addEventListener('click', async () => {
@@ -778,7 +1082,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (!unlocked) {
-                alert(`❌ ${name} is locked! Complete the requirement first.`);
+                if (id === 'window' || id === 'clock') {
+                    alert(`🔒 ${name} requires a Premium subscription!`);
+                } else if (['bookcase', 'laptop', 'carpet', 'lamp', 'drawer', 'wardrobe'].includes(id)) {
+                    alert(`🔒 ${name} requires Premium + completing the achievement!`);
+                } else {
+                    alert(`❌ ${name} is locked! Complete the requirement first.`);
+                }
                 return;
             }
             
@@ -788,9 +1098,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (confirm(`Buy ${name} for ${price} coins?`)) {
-                // Calculate new coin total
                 const newCoins = coins - price;
-                
                 try {
                     const response = await fetch('/update-coins', {
                         method: 'POST',
@@ -798,30 +1106,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         },
-                        body: JSON.stringify({
-                            coins: newCoins
-                        })
+                        body: JSON.stringify({ coins: newCoins })
                     });
-                    
                     const result = await response.json();
-                    
                     if (result.success) {
-                        // Update local state
                         coins = newCoins;
                         owned.add(id);
-                        
-                        // Save to localStorage
-                        saveOwned(owned);
-                        
-                        // Update displays
+                        await saveToDatabase();
                         updateCoinDisplay();
                         render();
-                        
                         alert(`✅ Purchased ${name}! Drag it anywhere to position it.`);
                     } else {
                         alert('❌ Failed to update coins. Please try again.');
                     }
-                    
                 } catch (error) {
                     console.error('Error:', error);
                     alert('❌ Error processing purchase');
@@ -829,17 +1126,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
+    
     // Toggle grid guide
     document.addEventListener('keydown', (e) => {
         if (e.key === 'g' || e.key === 'G') {
             gridGuide.classList.toggle('visible');
         }
     });
-
-    // Initial render
-    render();
+    
+    // Load from database on start
+    loadFromDatabase();
 });
 </script>
+    @include('partials.music')
 </body>
 </html>

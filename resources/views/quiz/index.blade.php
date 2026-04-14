@@ -102,14 +102,20 @@
             <section class="mb-8">
                 <h1 class="text-3xl md:text-4xl font-extrabold" style="color:{{ $GREEN }};">Financial Quizzes</h1>
                 <p class="mt-2" style="color: rgba(47,93,70,0.82);">
-                    Test your knowledge and earn rewards. Complete each level to unlock the next.
+                    Test your knowledge and earn rewards. Complete each level to unlock the next and strengthen your financial understanding.
+                    @if(!$user->isPremium())
+                        <span class="block text-sm mt-1" style="color: {{ $GOLD }};">✨ Premium quizzes (Levels 4-6) give higher rewards up to 150 XP!</span>
+                    @endif
                 </p>
             </section>
 
             {{-- Quiz Cards --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 @foreach($quizzes as $quiz)
-                    @php $status = $quizStatus[$quiz->id] ?? []; @endphp
+                    @php 
+                        $status = $quizStatus[$quiz->id] ?? [];
+                        $isPremiumQuiz = $quiz->order > 3;
+                    @endphp
                     
                     <div class="rounded-3xl border shadow-lg overflow-hidden transition-all hover:shadow-xl"
                          style="background:{{ $CARD }}; border-color: rgba(47,93,70,0.16); 
@@ -119,15 +125,24 @@
                         <div class="p-5 border-b" style="border-color: rgba(47,93,70,0.12); 
                                 background: {{ $status['status'] == 'completed' ? 'rgba(47,93,70,0.05)' : 'rgba(216,162,74,0.05)' }};">
                             <div class="flex items-center justify-between">
-                                <span class="text-sm font-semibold px-3 py-1 rounded-full"
-                                      style="background: {{ $status['status'] == 'completed' ? $GREEN : $GOLD }}20; 
-                                             color: {{ $status['status'] == 'completed' ? $GREEN : $GOLD }};">
-                                    Level {{ $quiz->order }}
-                                </span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-semibold px-3 py-1 rounded-full"
+                                          style="background: {{ $status['status'] == 'completed' ? $GREEN : $GOLD }}20; 
+                                                 color: {{ $status['status'] == 'completed' ? $GREEN : $GOLD }};">
+                                        Level {{ $quiz->order }}
+                                    </span>
+                                    @if($isPremiumQuiz)
+                                        <span class="text-xs px-2 py-1 rounded-full" style="background: {{ $GOLD }}20; color: {{ $GOLD }};">
+                                            ✨ Premium
+                                        </span>
+                                    @endif
+                                </div>
                                 @if($status['status'] == 'completed')
                                     <span class="text-sm" style="color: {{ $GREEN }};">✅ Completed</span>
                                 @elseif($status['locked'] ?? false)
                                     <span class="text-sm" style="color: rgba(47,93,70,0.55);">🔒 Locked</span>
+                                @elseif($status['status'] == 'premium_locked')
+                                    <span class="text-sm" style="color: {{ $GOLD }};">✨ Premium</span>
                                 @else
                                     <span class="text-sm" style="color: {{ $GOLD }};">📝 Ready</span>
                                 @endif
@@ -180,6 +195,12 @@
                                         </a>
                                     @endif
                                 </div>
+                            @elseif($status['status'] == 'premium_locked')
+                                <button disabled
+                                        class="w-full mt-2 px-4 py-3 rounded-xl font-semibold border cursor-not-allowed"
+                                        style="background: rgba(216,162,74,0.05); color: rgba(216,162,74,0.55); border-color: rgba(216,162,74,0.2);">
+                                    ✨ Premium - Upgrade to Unlock
+                                </button>
                             @elseif($status['available'] ?? false)
                                 <a href="{{ route('quiz.take', $quiz) }}"
                                    class="block w-full mt-2 px-4 py-3 rounded-xl font-semibold text-center transition hover:opacity-90"
@@ -217,13 +238,18 @@
                     </div>
                     <div class="flex gap-2">
                         <span style="color: {{ $GOLD }};">2️⃣</span>
-                        <span>Higher rewards for first attempts (90 XP) — decreases gradually to 60 XP</span>
+                        <span>Free quizzes: 90 XP → 60 XP. Premium quizzes: 150 XP → 90 XP</span>
                     </div>
                     <div class="flex gap-2">
                         <span style="color: {{ $GOLD }};">3️⃣</span>
                         <span>Reward only on PASS (70%+). Once passed, you can't earn more from that level</span>
                     </div>
                 </div>
+                @if(!$user->isPremium())
+                    <div class="mt-4 p-3 rounded-lg text-center" style="background: rgba(216,162,74,0.1);">
+                        <p class="text-sm" style="color: {{ $GOLD }};">✨ Upgrade to Premium to unlock Levels 4-6 with higher rewards! ✨</p>
+                    </div>
+                @endif
             </section>
             
             <footer class="text-center text-xs pt-12 pb-2" style="color: rgba(47,93,70,0.75);">
@@ -232,5 +258,6 @@
         </div>
     </div>
 </div>
+    @include('partials.music')
 </body>
 </html>

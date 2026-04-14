@@ -42,14 +42,13 @@ class StatsController extends Controller
             ->groupBy('category')
             ->get();
 
-        // Get daily spending for last 7 days
+        // 🔴 FIXED: Get daily spending for SELECTED MONTH (not last 7 days)
         $dailyData = [];
-        $today = Carbon::now();
+        $daysInMonth = $selectedDate->daysInMonth;
         
-        for ($i = 6; $i >= 0; $i--) {
-            $date = $today->copy()->subDays($i);
-            $dateString = $date->format('Y-m-d');
-            $displayDate = $date->format('D d');
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+            $dateString = $selectedYear . '-' . str_pad($selectedMonth, 2, '0', STR_PAD_LEFT) . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
+            $displayDate = $day;  // Use day number as label
             
             $total = $user->transactions()
                 ->where('type', 'expense')
@@ -94,7 +93,6 @@ class StatsController extends Controller
             ->whereYear('date', $selectedYear)
             ->sum('amount') ?: 0;
 
-        $daysInMonth = $selectedDate->daysInMonth;
         $avgDaily = $daysInMonth > 0 ? round($totalExpense / $daysInMonth, 2) : 0;
         
         $topCategory = $categoryData->sortByDesc('total')->first();

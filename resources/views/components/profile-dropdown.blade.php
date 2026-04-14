@@ -33,15 +33,23 @@
          x-transition:leave="transition ease-in duration-75"
          x-transition:leave-start="transform opacity-100 scale-100"
          x-transition:leave-end="transform opacity-0 scale-95"
-         class="absolute right-0 mt-2 w-56 rounded-xl shadow-lg py-1 z-50 border"
+         class="absolute right-0 mt-2 w-72 rounded-xl shadow-lg py-1 z-50 border"
          style="background: #FFFBF2; border-color: rgba(47,93,70,0.16);"
          @click.away="open = false">
         
-        {{-- User Info (optional - you can remove this too if you want) --}}
+        {{-- User Info --}}
         <div class="px-4 py-3 border-b" style="border-color: rgba(47,93,70,0.12);">
             <p class="text-sm font-medium" style="color: #2F5D46;">{{ $user->name }}</p>
             <p class="text-xs truncate" style="color: rgba(47,93,70,0.65);">{{ $user->email }}</p>
         </div>
+
+        {{-- 🔴 UPDATED: Subscription Link to dedicated page --}}
+        <a href="{{ route('subscription') }}" 
+           class="block px-4 py-2 text-sm hover:bg-opacity-80 transition"
+           style="color: #2F5D46; hover:background: rgba(216,162,74,0.1);"
+           @click="open = false">
+            <span class="mr-2">✨</span> Subscription
+        </a>
 
         {{-- Settings --}}
         <a href="{{ route('profile.edit') }}" 

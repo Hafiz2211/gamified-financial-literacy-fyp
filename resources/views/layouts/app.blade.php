@@ -62,7 +62,6 @@
         ];
         
         $active = request()->route()->getName();
-        // Map route names to nav keys
         if (str_starts_with($active, 'quiz.')) $active = 'quiz';
         if ($active === 'town') $active = 'town';
         if ($active === 'spending') $active = 'spending';
@@ -91,5 +90,54 @@
             </footer>
         </div>
     </div>
+    
+    {{-- Background Music (plays on all pages, ON by default) --}}
+    <audio id="bgMusic" loop preload="auto" style="display:none;">
+        <source src="{{ asset('music/days-off-matrika-main-version-39449-02-56.mp3') }}" type="audio/mpeg">
+    </audio>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bgMusic = document.getElementById('bgMusic');
+            bgMusic.volume = 0.25; // 25% volume - subtle background
+            
+            // 🔴 DEFAULT TO ON for new users
+            let musicEnabled = localStorage.getItem('musicEnabled');
+            if (musicEnabled === null) {
+                // First time user - default to ON
+                musicEnabled = 'true';
+                localStorage.setItem('musicEnabled', 'true');
+            }
+            const isEnabled = musicEnabled === 'true';
+            
+            if (isEnabled) {
+                bgMusic.play().catch(e => {
+                    console.log('Autoplay prevented - waiting for user interaction');
+                    // Try to play on first user interaction
+                    const playOnInteraction = () => {
+                        if (localStorage.getItem('musicEnabled') === 'true' && bgMusic.paused) {
+                            bgMusic.play();
+                        }
+                        document.removeEventListener('click', playOnInteraction);
+                        document.removeEventListener('keydown', playOnInteraction);
+                    };
+                    document.addEventListener('click', playOnInteraction);
+                    document.addEventListener('keydown', playOnInteraction);
+                });
+            }
+            
+            // Listen for toggle changes from settings page
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'musicEnabled') {
+                    const isEnabled = e.newValue === 'true';
+                    if (isEnabled) {
+                        bgMusic.play();
+                    } else {
+                        bgMusic.pause();
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

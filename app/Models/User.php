@@ -162,6 +162,81 @@ class User extends Authenticatable
         return $this->xp - $currentThreshold;
     }
 
+    // ========== 🔴 PREMIUM METHODS ==========
+
+    /**
+     * 🔴 FIXED: Check if user has active premium subscription
+     * User keeps premium access until premium_until date expires
+     */
+    public function isPremium(): bool
+    {
+        // Check if user has premium flag AND premium_until date is set AND not expired
+        if ($this->is_premium && $this->premium_until) {
+            return now()->lessThan($this->premium_until);
+        }
+        return false;
+    }
+
+    /**
+     * Check if user can access a premium lesson
+     */
+    public function canAccessPremiumLesson($lessonNumber): bool
+    {
+        $freeLessons = [1, 2, 3, 4, 5, 6];
+        if (in_array($lessonNumber, $freeLessons)) {
+            return true;
+        }
+        return $this->isPremium();
+    }
+
+    /**
+     * Check if user can access a premium quiz
+     */
+    public function canAccessPremiumQuiz($quizOrder): bool
+    {
+        $freeQuizzes = [1, 2, 3];
+        if (in_array($quizOrder, $freeQuizzes)) {
+            return true;
+        }
+        return $this->isPremium();
+    }
+
+    /**
+     * Get reward for premium lesson
+     */
+    public function getPremiumLessonReward(): int
+    {
+        return 100;
+    }
+
+    /**
+     * Get reward for free lesson
+     */
+    public function getFreeLessonReward(): int
+    {
+        return 50;
+    }
+
+    /**
+     * Get reward for premium quiz based on attempt number
+     */
+    public function getPremiumQuizReward($attemptNumber): array
+    {
+        $reward = 150 - (($attemptNumber - 1) * 10);
+        $reward = max(90, $reward);
+        return ['xp' => $reward, 'coins' => $reward];
+    }
+
+    /**
+     * Get reward for free quiz based on attempt number
+     */
+    public function getFreeQuizReward($attemptNumber): array
+    {
+        $reward = 90 - (($attemptNumber - 1) * 5);
+        $reward = max(60, $reward);
+        return ['xp' => $reward, 'coins' => $reward];
+    }
+
     // Your existing relationships
     public function transactions()
     {

@@ -53,7 +53,6 @@
     $levelUpData = session('level_up');
     $usePut = false;
     
-    // Also check for put() style session if needed
     if (!$levelUpData && session()->has('level_up_put')) {
         $levelUpData = session('level_up_put');
         $usePut = true;
@@ -93,7 +92,7 @@
     $CARD  = '#FFFBF2';
     $active = 'dashboard';
 
-    // Calculate current balance (total income - total expenses)
+    // Calculate current balance
     $totalIncome = $user->transactions()->where('type', 'income')->sum('amount');
     $totalExpense = $user->transactions()->where('type', 'expense')->sum('amount');
     $currentBalance = $totalIncome - $totalExpense;
@@ -105,11 +104,10 @@
         ->whereYear('date', now()->year)
         ->sum('amount');
 
-    // Level calculation with proper thresholds matching User.php
+    // 🔴 KEEP YOUR ORIGINAL THRESHOLDS (matches User.php)
     $currentLevel = $user->level ?? 1;
     $currentXP = $user->xp ?? 0;
 
-    // Define XP thresholds for each level (MUST match User.php)
     $levelThresholds = [
         1 => 0,
         2 => 300,
@@ -123,21 +121,19 @@
         10 => 6300,
     ];
 
-    // XP needed for current level to next level
-    $currentLevelThreshold = $levelThresholds[$currentLevel] ?? 0;
-    $nextLevelThreshold = $levelThresholds[$currentLevel + 1] ?? ($currentLevelThreshold + 600);
-
-    // XP needed to reach next level
-    $xpNeededForNextLevel = $nextLevelThreshold - $currentLevelThreshold;
-
-    // XP earned in current level
-    $xpInCurrentLevel = $currentXP - $currentLevelThreshold;
-    $xpInCurrentLevel = max(0, $xpInCurrentLevel);
-
-    // Progress percentage
-    $xpProgress = $xpNeededForNextLevel > 0 ? ($xpInCurrentLevel / $xpNeededForNextLevel) * 100 : 0;
-    $xpProgress = min(100, max(0, $xpProgress));
-
+    // 🔴 FIXED: Calculate XP correctly for your thresholds
+    $currentThreshold = $levelThresholds[$currentLevel] ?? 0;
+    $nextThreshold = $levelThresholds[$currentLevel + 1] ?? ($currentThreshold + 600);
+    
+    // XP earned in current level (never negative, never over limit)
+    $xpInCurrentLevel = max(0, $currentXP - $currentThreshold);
+    
+    // Total XP needed for next level
+    $xpNeededForNextLevel = $nextThreshold - $currentThreshold;
+    
+    // Progress percentage (capped at 100%)
+    $xpProgress = $xpNeededForNextLevel > 0 ? min(100, ($xpInCurrentLevel / $xpNeededForNextLevel) * 100) : 0;
+    
     // Display text
     $xpDisplay = $xpInCurrentLevel . '/' . $xpNeededForNextLevel . ' XP to Level ' . ($currentLevel + 1);
 
@@ -152,7 +148,7 @@
         $title = 'Legendary Mayor';
     }
 
-    // Recent activity (last 5 transactions)
+    // Recent activity
     $recentTransactions = $user->transactions()->latest()->take(5)->get();
 
     $stats = [
@@ -172,28 +168,23 @@
 @endphp
 
 <div class="app-container">
-    {{-- Sidebar --}}
     @include('partials.sidebar', ['nav' => $nav, 'active' => $active, 'GREEN' => $GREEN, 'GOLD' => $GOLD])
 
-    {{-- Main content --}}
     <div class="main-content">
-        {{-- Profile dropdown in top right --}}
         <div style="display: flex; justify-content: flex-end; padding: 20px 24px 0;">
             @include('components.profile-dropdown', ['user' => auth()->user()])
         </div>
         
         <div style="max-width:1200px; margin:0 auto; padding:32px 24px;">
-            {{-- Welcome header --}}
             <section class="rounded-2xl border shadow-lg p-6 md:p-7"
                      style="border-color: rgba(47,93,70,0.16); background:{{ $CARD }};">
                 <h1 class="text-2xl md:text-3xl font-extrabold" style="color:{{ $GREEN }};">
                     Welcome back, Mayor {{ $userName }}
                 </h1>
                 <p class="mt-2" style="color: rgba(47,93,70,0.78);">
-                    Track your spending and learn to earn coins and XP to unlock and purchase decorations and buildings.
+                    Track your spending and earn coins and XP to unlock and purchase decorations and buildings.
                 </p>
 
-                {{-- Stat cards --}}
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     @foreach ($stats as $card)
                         <div class="rounded-2xl border p-5 shadow-sm"
@@ -219,7 +210,6 @@
                         </div>
                     @endforeach
 
-                    {{-- Level Card with Title --}}
                     <div class="rounded-2xl border p-5 shadow-sm"
                          style="border-color: rgba(47,93,70,0.16); background:{{ $CARD }};">
                         <div class="flex items-start justify-between gap-4">
@@ -253,7 +243,6 @@
                     </div>
                 </div>
 
-                {{-- Recent Activity --}}
                 <div class="mt-6">
                     <div class="rounded-2xl border p-5 shadow-sm"
                          style="border-color: rgba(47,93,70,0.16); background:{{ $CARD }};">
@@ -298,5 +287,6 @@
         </div>
     </div>
 </div>
+    @include('partials.music')
 </body>
 </html>

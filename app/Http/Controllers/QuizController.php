@@ -22,7 +22,7 @@ class QuizController extends Controller
         foreach ($quizzes as $quiz) {
             $status = $this->getQuizStatus($user, $quiz);
             
-            // 🔴 ADDED: Add best attempt for completed quizzes
+            // Add best attempt for completed quizzes
             if ($status['status'] == 'completed') {
                 $status['best_attempt'] = $quiz->getBestAttempt($user->id);
             }
@@ -90,6 +90,16 @@ class QuizController extends Controller
             ], 403);
         }
         
+        // 🔴 Determine if this is a premium quiz (Levels 4-6)
+        $isPremiumQuiz = $quiz->order > 3;
+        
+        if ($isPremiumQuiz && !$user->isPremium()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This quiz requires a premium subscription. Upgrade to access!'
+            ], 403);
+        }
+        
         // Calculate score
         $questions = $quiz->questions;
         $totalQuestions = $questions->count();
@@ -108,15 +118,25 @@ class QuizController extends Controller
         // Get attempt number
         $attemptNumber = $quiz->getNextAttemptNumber($user->id);
         
-        // Calculate reward if passed
+        // 🔴 Calculate reward based on premium status
         $xpEarned = 0;
         $coinsEarned = 0;
         $rewardClaimed = false;
         
         if ($passed) {
-            $reward = UserQuizAttempt::calculateReward($attemptNumber);
-            $xpEarned = $reward['xp'];
-            $coinsEarned = $reward['coins'];
+            if ($isPremiumQuiz) {
+                // Premium reward: starts at 150, decreases by 10 until 90
+                $reward = 150 - (($attemptNumber - 1) * 10);
+                $reward = max(90, $reward);
+                $xpEarned = $reward;
+                $coinsEarned = $reward;
+            } else {
+                // Free reward: starts at 90, decreases by 5 until 60
+                $reward = 90 - (($attemptNumber - 1) * 5);
+                $reward = max(60, $reward);
+                $xpEarned = $reward;
+                $coinsEarned = $reward;
+            }
             $rewardClaimed = true;
         }
         
@@ -187,8 +207,11 @@ class QuizController extends Controller
                 'total' => $totalQuestions,
                 'attempt_number' => $attemptNumber,
                 'attempt_id' => $attempt->id,
+                'is_premium_quiz' => $isPremiumQuiz,
                 'message' => $passed 
-                    ? "🎉 Congratulations! You passed with {$score}% and earned {$xpEarned} XP and {$coinsEarned} coins!"
+                    ? ($isPremiumQuiz
+                        ? "🎉 Premium Quiz Passed! You earned {$xpEarned} XP and {$coinsEarned} coins!"
+                        : "🎉 Congratulations! You passed with {$score}% and earned {$xpEarned} XP and {$coinsEarned} coins!")
                     : "You scored {$score}%. You need {$quiz->passing_score}% to pass. Try again!",
                 'reward_claimed' => $rewardClaimed
             ];
@@ -260,6 +283,17 @@ class QuizController extends Controller
             ];
         }
         
+        // 🔴 Check premium quiz access
+        $isPremiumQuiz = $quiz->order > 3;
+        if ($isPremiumQuiz && !$user->isPremium()) {
+            return [
+                'available' => false,
+                'reason' => 'Premium subscription required. Upgrade to unlock!',
+                'status' => 'premium_locked',
+                'locked' => true
+            ];
+        }
+        
         // Check previous quiz completion
         if ($quiz->order > 1) {
             $previousQuiz = Quiz::where('order', $quiz->order - 1)->first();
@@ -286,7 +320,16 @@ class QuizController extends Controller
             ->where('quiz_id', $quiz->id)
             ->count();
         
-        $nextReward = UserQuizAttempt::calculateReward($attemptNumber);
+        // 🔴 Calculate next reward based on premium status
+        if ($isPremiumQuiz) {
+            $reward = 150 - (($attemptNumber - 1) * 10);
+            $reward = max(90, $reward);
+        } else {
+            $reward = 90 - (($attemptNumber - 1) * 5);
+            $reward = max(60, $reward);
+        }
+        
+        $nextReward = ['xp' => $reward, 'coins' => $reward];
         
         return [
             'available' => true,
@@ -295,7 +338,8 @@ class QuizController extends Controller
             'attempt_number' => $attemptNumber,
             'previous_attempts' => $previousAttempts,
             'next_reward' => $nextReward,
-            'passing_score' => $quiz->passing_score
+            'passing_score' => $quiz->passing_score,
+            'is_premium' => $isPremiumQuiz
         ];
     }
 }

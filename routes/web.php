@@ -8,6 +8,8 @@ use App\Http\Controllers\StatsController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\FurnitureController;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -17,10 +19,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('/track-spending', 'track-spending')->name('spending');
     Route::view('/progress', 'progress')->name('progress');
     Route::view('/town', 'town')->name('town');
+    Route::view('/subscription', 'subscription')->name('subscription');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])->group(function () { 
 
+    Route::post('/subscribe/monthly', [SubscriptionController::class, 'checkoutMonthly'])->name('subscribe.monthly');
+    Route::post('/subscribe/yearly', [SubscriptionController::class, 'checkoutYearly'])->name('subscribe.yearly');
+    Route::get('/subscription/success', [SubscriptionController::class, 'success'])->name('subscription.success');
+    Route::post('/subscription/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
+    
+    Route::get('/furniture/load', [App\Http\Controllers\FurnitureController::class, 'load'])->name('furniture.load');
+    Route::post('/furniture/save', [App\Http\Controllers\FurnitureController::class, 'save'])->name('furniture.save');
+    
     Route::get('/statistics', [StatsController::class, 'index'])
         ->name('statistics');
 

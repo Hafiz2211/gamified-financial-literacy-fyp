@@ -7,7 +7,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="text-slate-900" style="background:#F6F1E6;">
+<body class="text-slate-900" style="background:#F6F1E6; margin:0;">
 @php
     $GREEN = '#2F5D46';
     $GOLD = '#D8A24A';
@@ -25,28 +25,29 @@
     ];
 @endphp
 
-<div style="display:flex; height:100vh; width:100vw; overflow:hidden;">
-    {{-- Sidebar --}}
-    <div style="width:270px; height:100vh; background:{{ $GREEN }}; flex-shrink:0;">
-        @include('partials.sidebar', ['nav' => $nav, 'active' => $active, 'GREEN' => $GREEN, 'GOLD' => $GOLD])
-    </div>
+<div class="app-container" style="display:flex; height:100vh; width:100vw; overflow:hidden;">
+    @include('partials.sidebar', ['nav' => $nav, 'active' => $active, 'GREEN' => $GREEN, 'GOLD' => $GOLD])
 
-    {{-- Main Content --}}
-    <div style="flex:1; overflow-y:auto; padding:32px;">
-        <div style="max-width:800px; margin:0 auto;">
+    <div class="main-content" style="flex:1; overflow-y:auto; background:#F6F1E6;">
+        <div style="display: flex; justify-content: flex-end; padding: 20px 24px 0;">
+            @include('components.profile-dropdown', ['user' => auth()->user()])
+        </div>
+        
+        <div style="max-width:800px; margin:0 auto; padding:32px 24px;">
             
             <div class="mb-6">
                 <a href="{{ route('dashboard') }}" class="text-sm hover:underline" style="color: {{ $GREEN }};">
                     ← Back to Dashboard
                 </a>
                 <h1 class="text-3xl font-bold mt-2" style="color:{{ $GREEN }};">Edit Profile</h1>
+                <p class="text-sm mt-1" style="color: rgba(47,93,70,0.65);">Manage your account settings and preferences</p>
             </div>
 
             <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 @method('PUT')
 
-                {{-- Profile Photo --}}
+                {{-- 1. Profile Picture --}}
                 <div class="rounded-3xl border p-6" style="background:{{ $CARD }};">
                     <h2 class="text-xl font-bold mb-4" style="color:{{ $GREEN }};">Profile Picture</h2>
                     
@@ -80,18 +81,18 @@
                     </div>
                 </div>
 
-                {{-- Basic Info --}}
+                {{-- 2. Basic Information --}}
                 <div class="rounded-3xl border p-6" style="background:{{ $CARD }};">
                     <h2 class="text-xl font-bold mb-4" style="color:{{ $GREEN }};">Basic Information</h2>
                     
                     <div class="space-y-4">
-                        {{-- Name --}}
                         <div>
                             <label class="block text-sm font-semibold mb-1" style="color:{{ $GREEN }};">Name</label>
                             <input type="text" 
                                    name="name" 
                                    value="{{ old('name', $user->name) }}" 
                                    required
+                                   autocomplete="name"
                                    class="w-full rounded-xl border px-4 py-3 focus:outline-none"
                                    style="border-color: rgba(47,93,70,0.18); background: white;">
                             @error('name')
@@ -99,7 +100,6 @@
                             @enderror
                         </div>
 
-                        {{-- Email - Read only --}}
                         <div>
                             <label class="block text-sm font-semibold mb-1" style="color:{{ $GREEN }};">Email</label>
                             <input type="email" 
@@ -107,46 +107,73 @@
                                    disabled
                                    class="w-full rounded-xl border px-4 py-3 bg-gray-50 cursor-not-allowed"
                                    style="border-color: rgba(47,93,70,0.18); background: #f9fafb; color: #6b7280;">
+                            <p class="text-xs mt-1" style="color: rgba(47,93,70,0.55);">Email cannot be changed</p>
                         </div>
                     </div>
                 </div>
 
-                {{-- Change Password --}}
+                {{-- 3. Change Password --}}
                 <div class="rounded-3xl border p-6" style="background:{{ $CARD }};">
                     <h2 class="text-xl font-bold mb-4" style="color:{{ $GREEN }};">Change Password</h2>
                     <p class="text-sm mb-4" style="color: rgba(47,93,70,0.65);">Leave blank to keep current password</p>
                     
                     <div class="space-y-4">
-                        {{-- Current Password --}}
                         <div>
                             <label class="block text-sm font-semibold mb-1" style="color:{{ $GREEN }};">Current Password</label>
                             <input type="password" 
                                    name="current_password" 
+                                   autocomplete="current-password"
                                    class="w-full rounded-xl border px-4 py-3 focus:outline-none"
                                    style="border-color: rgba(47,93,70,0.18); background: white;">
                         </div>
 
-                        {{-- New Password --}}
                         <div>
                             <label class="block text-sm font-semibold mb-1" style="color:{{ $GREEN }};">New Password</label>
                             <input type="password" 
                                    name="new_password" 
+                                   autocomplete="new-password"
                                    class="w-full rounded-xl border px-4 py-3 focus:outline-none"
                                    style="border-color: rgba(47,93,70,0.18); background: white;">
                         </div>
 
-                        {{-- Confirm New Password --}}
                         <div>
                             <label class="block text-sm font-semibold mb-1" style="color:{{ $GREEN }};">Confirm New Password</label>
                             <input type="password" 
                                    name="new_password_confirmation" 
+                                   autocomplete="new-password"
                                    class="w-full rounded-xl border px-4 py-3 focus:outline-none"
                                    style="border-color: rgba(47,93,70,0.18); background: white;">
                         </div>
                     </div>
                 </div>
 
-                {{-- Submit Buttons --}}
+                {{-- 4. MUSIC SETTINGS (SIMPLE WORKING CHECKBOX) --}}
+                <div class="rounded-3xl border p-6" style="background:{{ $CARD }}; border-color: rgba(47,93,70,0.16);">
+                    <h2 class="text-xl font-bold mb-4" style="color:{{ $GREEN }};">🎵 Audio Settings</h2>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="font-semibold" style="color:{{ $GREEN }};">Background Music</div>
+                            <p class="text-xs mt-1" style="color: rgba(47,93,70,0.65);">Cozy background music for your BruSave experience</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="musicToggle" 
+                                   style="width: 20px; height: 20px; cursor: pointer; accent-color: #D8A24A;">
+                            <span class="text-sm" style="color: {{ $GREEN }};">ON / OFF</span>
+                        </div>
+                    </div>
+                    
+                    {{-- Music Credit --}}
+                    <div class="mt-4 pt-4 border-t text-center" style="border-color: rgba(47,93,70,0.12);">
+                        <p class="text-xs" style="color: rgba(47,93,70,0.55);">
+                            🎵 "Days Off" by Matrika<br>
+                            Music from <a href="https://uppbeat.io/t/matrika/days-off" target="_blank" style="color: {{ $GOLD }};">Uppbeat (free for Creators!)</a>
+                        </p>
+                    </div>
+                </div>
+
+                {{-- 5. Submit Buttons --}}
                 <div class="flex gap-4">
                     <button type="submit" 
                             class="px-8 py-3 rounded-xl font-semibold transition hover:opacity-90"
@@ -160,8 +187,46 @@
                     </a>
                 </div>
             </form>
+
+            <footer class="text-center text-xs pt-8 pb-2" style="color: rgba(47,93,70,0.75); margin-top: 40px;">
+                © {{ date('Y') }} Bru<i>Save</i>
+            </footer>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const musicToggle = document.getElementById('musicToggle');
+        
+        if (musicToggle) {
+            // Default to ON for new users
+            let musicEnabled = localStorage.getItem('musicEnabled');
+            if (musicEnabled === null) {
+                musicEnabled = 'true';
+                localStorage.setItem('musicEnabled', 'true');
+            }
+            const isEnabled = musicEnabled === 'true';
+            
+            musicToggle.checked = isEnabled;
+            
+            // Handle toggle change
+            musicToggle.addEventListener('change', function() {
+                const isChecked = this.checked;
+                localStorage.setItem('musicEnabled', isChecked ? 'true' : 'false');
+                
+                // Dispatch storage event to notify other pages
+                window.dispatchEvent(new StorageEvent('storage', {
+                    key: 'musicEnabled',
+                    newValue: isChecked ? 'true' : 'false'
+                }));
+                
+                console.log('Music ' + (isChecked ? 'ON' : 'OFF'));
+            });
+        }
+    });
+</script>
+
+@include('partials.music')
 </body>
 </html>

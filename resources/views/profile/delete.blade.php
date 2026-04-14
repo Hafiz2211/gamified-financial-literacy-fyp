@@ -7,7 +7,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="text-slate-900" style="background:#F6F1E6;">
+<body class="text-slate-900" style="background:#F6F1E6; margin:0;">
 @php
     $GREEN = '#2F5D46';
     $GOLD = '#D8A24A';
@@ -25,15 +25,18 @@
     ];
 @endphp
 
-<div style="display:flex; height:100vh; width:100vw; overflow:hidden;">
+<div class="app-container" style="display:flex; height:100vh; width:100vw; overflow:hidden;">
     {{-- Sidebar --}}
-    <div style="width:270px; height:100vh; background:{{ $GREEN }}; flex-shrink:0;">
-        @include('partials.sidebar', ['nav' => $nav, 'active' => $active, 'GREEN' => $GREEN, 'GOLD' => $GOLD])
-    </div>
+    @include('partials.sidebar', ['nav' => $nav, 'active' => $active, 'GREEN' => $GREEN, 'GOLD' => $GOLD])
 
     {{-- Main Content --}}
-    <div style="flex:1; overflow-y:auto; padding:32px;">
-        <div style="max-width:600px; margin:0 auto;">
+    <div class="main-content" style="flex:1; overflow-y:auto; background:#F6F1E6;">
+        {{-- Profile dropdown in top right --}}
+        <div style="display: flex; justify-content: flex-end; padding: 20px 24px 0;">
+            @include('components.profile-dropdown', ['user' => auth()->user()])
+        </div>
+        
+        <div style="max-width:600px; margin:0 auto; padding:32px 24px;">
             
             <div class="mb-6">
                 <a href="{{ route('dashboard') }}" class="text-sm hover:underline" style="color: {{ $GREEN }};">
@@ -52,24 +55,12 @@
                 </div>
 
                 <ul class="mb-6 space-y-2 text-sm" style="color: rgba(47,93,70,0.8);">
-                    <li class="flex items-center gap-2">
-                        <span>❌</span> Profile information
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <span>❌</span> Lessons completed
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <span>❌</span> Quiz attempts and scores
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <span>❌</span> Spending records
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <span>❌</span> Room furniture and decorations
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <span>❌</span> All progress and achievements
-                    </li>
+                    <li class="flex items-center gap-2"><span>❌</span> Profile information</li>
+                    <li class="flex items-center gap-2"><span>❌</span> Lessons completed</li>
+                    <li class="flex items-center gap-2"><span>❌</span> Quiz attempts and scores</li>
+                    <li class="flex items-center gap-2"><span>❌</span> Spending records</li>
+                    <li class="flex items-center gap-2"><span>❌</span> Room furniture and decorations</li>
+                    <li class="flex items-center gap-2"><span>❌</span> All progress and achievements</li>
                 </ul>
 
                 <form method="POST" action="{{ route('profile.destroy') }}" class="space-y-4">
@@ -81,6 +72,7 @@
                         <input type="password" 
                                name="password" 
                                required
+                               autocomplete="current-password"
                                class="w-full rounded-xl border px-4 py-3 focus:outline-none"
                                style="border-color: rgba(47,93,70,0.18); background: white;">
                     </div>
@@ -110,8 +102,12 @@
                     </div>
                 </form>
             </div>
+            <footer class="text-center text-xs pt-8 pb-2" style="color: rgba(47,93,70,0.75);">
+                © {{ date('Y') }} Bru<i>Save</i>
+            </footer>
         </div>
     </div>
 </div>
+    @include('partials.music')
 </body>
 </html>
