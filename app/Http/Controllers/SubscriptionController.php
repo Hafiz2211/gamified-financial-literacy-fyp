@@ -22,7 +22,7 @@ class SubscriptionController extends Controller
                     'currency' => 'bnd',
                     'product_data' => [
                         'name' => 'BruSave Premium - Monthly',
-                        'description' => 'Access premium lessons, quizzes, furniture, and extra rooms!',
+                        'description' => 'Unlock premium lessons, quizzes, furniture, and exclusive partner deals. Cancel anytime.',
                     ],
                     'unit_amount' => 300,
                     'recurring' => ['interval' => 'month'],
@@ -50,9 +50,9 @@ class SubscriptionController extends Controller
                     'currency' => 'bnd',
                     'product_data' => [
                         'name' => 'BruSave Premium - Yearly',
-                        'description' => 'Access premium lessons, quizzes, furniture, and extra rooms! Save with yearly plan!',
+                        'description' => 'Everything in Monthly, plus priority access to new features and partner rewards. Save $6 with yearly billing!',
                     ],
-                    'unit_amount' => 3600,
+                    'unit_amount' => 3000,
                     'recurring' => ['interval' => 'year'],
                 ],
                 'quantity' => 1,

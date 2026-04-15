@@ -39,8 +39,8 @@
         <div style="max-width:600px; margin:0 auto; padding:32px 24px;">
             
             <div class="mb-6">
-                <a href="{{ route('dashboard') }}" class="text-sm hover:underline" style="color: {{ $GREEN }};">
-                    ← Back to Dashboard
+                <a href="{{ route('profile.edit') }}" class="text-sm hover:underline" style="color: {{ $GREEN }};">
+                    ← Back to Profile
                 </a>
                 <h1 class="text-3xl font-bold mt-2" style="color: #b43c3c;">Delete Account</h1>
             </div>
@@ -94,7 +94,7 @@
                                 style="background: #b43c3c; color: white;">
                             Permanently Delete Account
                         </button>
-                        <a href="{{ route('dashboard') }}" 
+                        <a href="{{ route('profile.edit') }}" 
                            class="px-8 py-3 rounded-xl font-semibold border transition hover:opacity-90"
                            style="border-color: rgba(47,93,70,0.2); color: {{ $GREEN }};">
                             Cancel
@@ -108,6 +108,5 @@
         </div>
     </div>
 </div>
-    @include('partials.music')
 </body>
 </html>

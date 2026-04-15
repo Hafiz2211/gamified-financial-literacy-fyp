@@ -246,13 +246,10 @@
 
                         {{-- PHOTO UPLOAD --}}
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold" style="color:{{ $GREEN }};">Picture (optional)</label>
+                            <label class="block text-sm font-semibold" style="color:{{ $GREEN }};">Picture of your receipt or item (optional)</label>
                             <input id="photo" name="photo" type="file" accept="image/*"
                                    class="mt-2 w-full text-sm"
                                    style="color: rgba(47,93,70,0.80);">
-                            <p class="mt-1 text-xs" style="color: rgba(47,93,70,0.65);">
-                                Upload a photo of your receipt or item.
-                            </p>
                         </div>
 
                         {{-- STATISTICS BUTTON --}}
@@ -697,6 +694,5 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(updateStats, 30000);
 });
 </script>
-    @include('partials.music')
 </body>
 </html>

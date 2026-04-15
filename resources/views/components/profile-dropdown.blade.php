@@ -43,7 +43,7 @@
             <p class="text-xs truncate" style="color: rgba(47,93,70,0.65);">{{ $user->email }}</p>
         </div>
 
-        {{-- 🔴 UPDATED: Subscription Link to dedicated page --}}
+        {{-- Subscription Link to dedicated page --}}
         <a href="{{ route('subscription') }}" 
            class="block px-4 py-2 text-sm hover:bg-opacity-80 transition"
            style="color: #2F5D46; hover:background: rgba(216,162,74,0.1);"
@@ -57,14 +57,6 @@
            style="color: #2F5D46; hover:background: rgba(216,162,74,0.1);"
            @click="open = false">
             <span class="mr-2">⚙️</span> Settings
-        </a>
-        
-        {{-- Delete Account --}}
-        <a href="{{ route('profile.delete') }}" 
-           class="block px-4 py-2 text-sm hover:bg-opacity-80 transition"
-           style="color: #b43c3c; hover:background: rgba(180,60,60,0.1);"
-           @click="open = false">
-            <span class="mr-2">🗑️</span> Delete Account
         </a>
         
         <div class="border-t my-1" style="border-color: rgba(47,93,70,0.12);"></div>

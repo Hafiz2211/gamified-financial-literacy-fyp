@@ -1,2 +1,14 @@
-*
-!.gitignore
+# Ignore environment files (IMPORTANT)
+.env
+.env.*
+!.env.example
+
+# Laravel default ignores
+/vendor
+/node_modules
+/public/storage
+/storage/*.key
+
+# OS / editor junk
+.DS_Store
+Thumbs.db

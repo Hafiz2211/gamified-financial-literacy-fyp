@@ -293,6 +293,5 @@
         </div>
     </div>
 </div>
-    @include('partials.music')
 </body>
 </html>

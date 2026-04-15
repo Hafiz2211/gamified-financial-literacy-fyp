@@ -234,15 +234,15 @@
                 <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm" style="color: rgba(47,93,70,0.8);">
                     <div class="flex gap-2">
                         <span style="color: {{ $GOLD }};">1️⃣</span>
-                        <span>Complete Level 1 to unlock Level 2, then Level 2 to unlock Level 3</span>
+                        <span>Complete Level 1 to unlock Level 2, then Level 2 to unlock Level 3, and so on</span>
                     </div>
                     <div class="flex gap-2">
                         <span style="color: {{ $GOLD }};">2️⃣</span>
-                        <span>Free quizzes: 90 XP → 60 XP. Premium quizzes: 150 XP → 90 XP</span>
+                        <span>Free quizzes: 90 XP (decreases to 60 XP on retry) while Premium quizzes: 150 XP (decreases to 90 XP on retry)</span>
                     </div>
                     <div class="flex gap-2">
                         <span style="color: {{ $GOLD }};">3️⃣</span>
-                        <span>Reward only on PASS (70%+). Once passed, you can't earn more from that level</span>
+                        <span>Score 70% or higher to pass. Rewards are only given when you pass — and only once per level</span>
                     </div>
                 </div>
                 @if(!$user->isPremium())
@@ -258,6 +258,5 @@
         </div>
     </div>
 </div>
-    @include('partials.music')
 </body>
 </html>

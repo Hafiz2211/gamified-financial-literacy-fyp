@@ -103,6 +103,36 @@
             max-height: 250px;
         }
 
+        /* 🧚 Wisp Pet Styles */
+        .wisp-pet {
+            position: absolute;
+            cursor: pointer;
+            transition: left 0.3s ease-out, top 0.3s ease-out;
+            z-index: 200;
+            filter: drop-shadow(0 0 8px rgba(216,162,74,0.6));
+            pointer-events: auto;
+        }
+        
+        .wisp-pet img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+        
+        .wisp-pet.following {
+            transition: left 0.1s ease-out, top 0.1s ease-out;
+        }
+        
+        @keyframes floatWisp {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .wisp-pet {
+            animation: floatWisp 3s ease-in-out infinite;
+        }
+
         .tooltip-tag {
             position: absolute;
             left: 50%;
@@ -249,6 +279,11 @@
                 max-height: 55px !important;
             }
             
+            .wisp-pet {
+                width: 50px !important;
+                height: 50px !important;
+            }
+            
             .shop-preview img {
                 max-height: 35px;
             }
@@ -307,6 +342,11 @@
             .furniture-item img {
                 max-width: 35px !important;
                 max-height: 35px !important;
+            }
+            
+            .wisp-pet {
+                width: 40px !important;
+                height: 40px !important;
             }
             
             .grid-cols-1.md\:grid-cols-5 {
@@ -510,8 +550,8 @@
         ],
     ];
     
-    // 🟡 PREMIUM (Simple Unlock)
-    $premiumFurniture = [
+    // 🔴 MERGED PREMIUM FURNITURE (All 8 premium items in ONE section)
+    $premiumFurnitureMerged = [
         'window' => [
             'name' => 'Window',
             'image' => asset('images/room/window.png'),
@@ -536,10 +576,6 @@
             'defaultPos' => ['left' => 500, 'top' => 60, 'width' => 60],
             'z' => 15
         ],
-    ];
-    
-    // 🔴 PREMIUM ACHIEVEMENT (Main System) - REMOVED makeuptable
-    $premiumAchievementFurniture = [
         'bookcase' => [
             'name' => 'Bookcase',
             'image' => asset('images/room/bookcase.png'),
@@ -547,7 +583,7 @@
             'requirement' => 'Complete 2 premium lessons',
             'price' => 220,
             'unlocked' => $completedPremiumLessons >= 2 && $isPremium,
-            'category' => 'premium_achievement',
+            'category' => 'premium',
             'size' => 'large',
             'defaultPos' => ['left' => 50, 'top' => 150, 'width' => 120],
             'z' => 20
@@ -559,7 +595,7 @@
             'requirement' => 'Pass 1 premium quiz',
             'price' => 250,
             'unlocked' => $passedPremiumQuizzes >= 1 && $isPremium,
-            'category' => 'premium_achievement',
+            'category' => 'premium',
             'size' => 'small',
             'defaultPos' => ['left' => 650, 'top' => 220, 'width' => 80],
             'z' => 40
@@ -571,7 +607,7 @@
             'requirement' => 'Track 30 spending records + Premium',
             'price' => 150,
             'unlocked' => $spendingRecords >= 30 && $isPremium,
-            'category' => 'premium_achievement',
+            'category' => 'premium',
             'size' => 'large',
             'defaultPos' => ['left' => 300, 'top' => 350, 'width' => 300],
             'z' => 1
@@ -583,7 +619,7 @@
             'requirement' => 'Reach Level 5 + Premium',
             'price' => 180,
             'unlocked' => $level >= 5 && $isPremium,
-            'category' => 'premium_achievement',
+            'category' => 'premium',
             'size' => 'small',
             'defaultPos' => ['left' => 850, 'top' => 250, 'width' => 50],
             'z' => 20
@@ -592,10 +628,10 @@
             'name' => 'Drawer',
             'image' => asset('images/room/drawer.png'),
             'condition' => $passedPremiumQuizzes >= 3 && $isPremium,
-            'requirement' => 'Pass ALL premium quizzes (3)',
+            'requirement' => 'Pass ALL premium quizzes',
             'price' => 160,
             'unlocked' => $passedPremiumQuizzes >= 3 && $isPremium,
-            'category' => 'premium_achievement',
+            'category' => 'premium',
             'size' => 'medium',
             'defaultPos' => ['left' => 200, 'top' => 380, 'width' => 100],
             'z' => 20
@@ -604,18 +640,35 @@
             'name' => 'Wardrobe',
             'image' => asset('images/room/wardrobe.png'),
             'condition' => $completedPremiumLessons >= 6 && $isPremium,
-            'requirement' => 'Complete ALL premium lessons (6)',
+            'requirement' => 'Complete ALL premium lessons',
             'price' => 280,
             'unlocked' => $completedPremiumLessons >= 6 && $isPremium,
-            'category' => 'premium_achievement',
+            'category' => 'premium',
             'size' => 'large',
             'defaultPos' => ['left' => 100, 'top' => 80, 'width' => 200],
             'z' => 20
         ],
     ];
     
+    // 🧚 WISP PET (Special item)
+    $wispPet = [
+        'wisp' => [
+            'name' => 'Blue Wisp',
+            'image' => asset('images/room/wisp.gif'),
+            'condition' => $level >= 3,
+            'requirement' => 'Reach Level 3',
+            'price' => 200,
+            'unlocked' => $level >= 3,
+            'category' => 'pet',
+            'size' => 'small',
+            'defaultPos' => ['left' => 460, 'top' => 240, 'width' => 60],
+            'z' => 200,
+            'isPet' => true
+        ],
+    ];
+    
     // Merge all furniture
-    $allFurniture = array_merge($freeFurniture, $premiumFurniture, $premiumAchievementFurniture);
+    $allFurniture = array_merge($freeFurniture, $premiumFurnitureMerged, $wispPet);
 @endphp
 
 <div class="app-container">
@@ -637,8 +690,7 @@
                             {{ $userName }}'s Home
                         </div>
                          <p class="mt-2 text-sm" style="color: rgba(47,93,70,0.8);">
-                            Unlock furniture by completing lessons, quizzes and tracking your spending. 
-                            <strong>Premium users unlock exclusive items, but must still earn them through achievement!</strong>
+                            Unlock furniture by completing lessons, quizzes and tracking your spending to showcase your achievements.
                          </p>
                     </div>
 
@@ -703,7 +755,7 @@
             {{-- 🔴 COMING SOON BANNER (Above Furniture Shop) --}}
             <div class="p-3 rounded-xl text-center" style="background: rgba(47,93,70,0.08); border: 1px dashed {{ $GOLD }}; margin-bottom: 25px;">
                 <p style="color: {{ $GREEN }}; font-size: 13px; margin: 0;">
-                    🏠 <strong>Coming Soon!</strong> Kitchen and Living Room decorations will be available in a future update. Stay tuned! ✨
+                    🏠 <strong>Coming Soon!</strong> Kitchen, Pets and Living Room decorations will be available in a future update. Stay tuned! ✨
                 </p>
             </div>
 
@@ -717,7 +769,7 @@
                 </div>
                 
                 {{-- 🟢 FREE SECTION --}}
-                <div class="section-header" style="color:{{ $GREEN }};">🟢 Starter Furniture</div>
+                <div class="section-header" style="color:{{ $GREEN }};">🟢 Free Version Furniture</div>
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
                     @foreach($freeFurniture as $key => $item)
                         <div class="shop-item border text-center" 
@@ -750,30 +802,34 @@
                     @endforeach
                 </div>
                 
-                {{-- 🟡 PREMIUM SECTION --}}
-                <div class="section-header" style="color:{{ $GOLD }};">🟡 Premium Collection</div>
+                {{-- 🟡 PREMIUM FURNITURE (ALL 8 items together) --}}
+                <div class="section-header" style="color:{{ $GOLD }};">🟡 Premium Version Furniture</div>
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-                    @foreach($premiumFurniture as $key => $item)
+                    @foreach($premiumFurnitureMerged as $key => $item)
+                        @php 
+                            $isUnlocked = $item['unlocked'];
+                            $requirementText = $item['requirement'];
+                        @endphp
                         <div class="shop-item border text-center" 
                              data-id="{{ $key }}"
                              data-price="{{ $item['price'] }}"
                              data-name="{{ $item['name'] }}"
-                             data-unlocked="{{ $item['condition'] ? 'true' : 'false' }}"
-                             style="border-color: {{ $item['condition'] ? 'rgba(216,162,74,0.4)' : 'rgba(47,93,70,0.16)' }};
-                                    background: {{ $item['condition'] ? 'rgba(216,162,74,0.05)' : 'rgba(47,93,70,0.02)' }};">
+                             data-unlocked="{{ $isUnlocked ? 'true' : 'false' }}"
+                             style="border-color: {{ $isUnlocked ? 'rgba(216,162,74,0.4)' : 'rgba(47,93,70,0.16)' }};
+                                    background: {{ $isUnlocked ? 'rgba(216,162,74,0.05)' : 'rgba(47,93,70,0.02)' }};">
                             
                             <div class="shop-preview">
                                 <img src="{{ $item['image'] }}" 
                                      alt="{{ $item['name'] }}"
-                                     style="{{ !$item['condition'] ? 'filter: grayscale(100%) opacity(0.5);' : '' }}">
+                                     style="{{ !$isUnlocked ? 'filter: grayscale(100%) opacity(0.5);' : '' }}">
                             </div>
                             
                             <div class="font-bold text-sm" style="color:{{ $GREEN }};">{{ $item['name'] }}</div>
-                            <div class="text-xs mt-1" style="color: rgba(47,93,70,0.65);">{{ $item['requirement'] }}</div>
+                            <div class="text-xs mt-1" style="color: rgba(47,93,70,0.65);">{{ $requirementText }}</div>
                             <div class="text-lg font-bold mt-2" style="color:{{ $GOLD }};">{{ $item['price'] }} 🪙</div>
                             <div class="text-xs mt-2 requirement-text">
-                                @if(!$item['condition'])
-                                    <span style="color: #b43c3c;">🔒 Premium Required</span>
+                                @if(!$isUnlocked)
+                                    <span style="color: #b43c3c;">🔒 Locked</span>
                                 @elseif($coins < $item['price'])
                                     <span style="color: {{ $GOLD }};">💰 Need coins</span>
                                 @else
@@ -784,15 +840,16 @@
                     @endforeach
                 </div>
                 
-                {{-- 🔴 PREMIUM ACHIEVEMENT SECTION --}}
-                <div class="section-header" style="color:{{ $GOLD }};">🔴 Advanced Collection</div>
+                {{-- 🧚 PET SECTION --}}
+                <div class="section-header mt-4" style="color:{{ $GREEN }};">🐾 Pets</div>
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    @foreach($premiumAchievementFurniture as $key => $item)
+                    @foreach($wispPet as $key => $item)
                         <div class="shop-item border text-center" 
                              data-id="{{ $key }}"
                              data-price="{{ $item['price'] }}"
                              data-name="{{ $item['name'] }}"
                              data-unlocked="{{ $item['condition'] ? 'true' : 'false' }}"
+                             data-is-pet="true"
                              style="border-color: {{ $item['condition'] ? 'rgba(216,162,74,0.4)' : 'rgba(47,93,70,0.16)' }};
                                     background: {{ $item['condition'] ? 'rgba(216,162,74,0.05)' : 'rgba(47,93,70,0.02)' }};">
                             
@@ -807,11 +864,11 @@
                             <div class="text-lg font-bold mt-2" style="color:{{ $GOLD }};">{{ $item['price'] }} 🪙</div>
                             <div class="text-xs mt-2 requirement-text">
                                 @if(!$item['condition'])
-                                    <span style="color: #b43c3c;">🔒 Premium + Achievement</span>
+                                    <span style="color: #b43c3c;">🔒 Level 3 Required</span>
                                 @elseif($coins < $item['price'])
                                     <span style="color: {{ $GOLD }};">💰 Need coins</span>
                                 @else
-                                    <span style="color: {{ $GREEN }};">✅ Buy</span>
+                                    <span style="color: {{ $GREEN }};">✅ Adopt</span>
                                 @endif
                             </div>
                         </div>
@@ -835,7 +892,7 @@
                     </div>
                 </div>
 
-                <div class="room-container">
+                <div class="room-container" id="roomContainer">
                     <img src="{{ asset('images/room/room.png') }}" alt="Empty room" class="absolute inset-0 w-full h-full object-cover pointer-events-none select-none" onerror="this.style.display='none';">
                     <div id="gridGuide" class="grid-guide">
                         @for($i = 0; $i < 96; $i++)
@@ -843,12 +900,14 @@
                         @endfor
                     </div>
                     <div id="furnitureLayer" class="absolute inset-0"></div>
+                    <div id="wispLayer" class="absolute inset-0 pointer-events-none"></div>
                 </div>
             </section>
 
             <footer class="text-center text-xs pt-8 pb-2" style="color: rgba(47,93,70,0.75);">
                 © {{ date('Y') }} Bru<i>Save</i> &nbsp;|&nbsp;
-                Pixel World assets by <a href="https://bitglow.itch.io/pixel-world-complete-pack-pixel-art-assets" target="_blank" style="color: {{ $GOLD }}; text-decoration: none;">bitglow (itch.io)</a>
+                Pixel World assets by <a href="https://bitglow.itch.io/pixel-world-complete-pack-pixel-art-assets" target="_blank" style="color: {{ $GOLD }}; text-decoration: none;">bitglow (itch.io)</a> &nbsp;|&nbsp;
+                Glowing Ball sprite by <a href="https://lvgames.itch.io/free-glowing-ball-sprite-pixel-fx-rpg-maker-ready" target="_blank" style="color: {{ $GOLD }}; text-decoration: none;">LVGames</a>
             </footer>
         </div>
     </div>
@@ -863,6 +922,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load from DATABASE
     let owned = new Set();
     let savedPositions = {};
+    let wispElement = null;
+    let wispFollowing = false;
+    let wispMoveInterval = null;
     
     // Load from database via API
     async function loadFromDatabase() {
@@ -873,6 +935,7 @@ document.addEventListener('DOMContentLoaded', () => {
             savedPositions = data.positions || {};
             render();
             updateShopItems();
+            renderWisp();
         } catch (error) {
             console.error('Error loading furniture:', error);
             loadFromLocalStorage();
@@ -890,6 +953,7 @@ document.addEventListener('DOMContentLoaded', () => {
             savedPositions = rawPos ? JSON.parse(rawPos) : {};
             render();
             updateShopItems();
+            renderWisp();
         } catch (e) {
             owned = new Set();
             savedPositions = {};
@@ -938,7 +1002,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const coinDisplay = document.getElementById('coinDisplay');
     const coinDisplay2 = document.getElementById('coinDisplay2');
     const layer = document.getElementById('furnitureLayer');
+    const wispLayer = document.getElementById('wispLayer');
     const gridGuide = document.getElementById('gridGuide');
+    const roomContainer = document.getElementById('roomContainer');
     
     // Update shop items to show owned status
     const updateShopItems = () => {
@@ -972,8 +1038,126 @@ document.addEventListener('DOMContentLoaded', () => {
         price: data.price,
         size: data.size,
         defaultPos: data.defaultPos,
-        z: data.z
+        z: data.z,
+        isPet: data.isPet || false
     }));
+    
+    // 🧚 Wisp movement functions
+    function startWispRandomMovement() {
+        if (wispMoveInterval) clearInterval(wispMoveInterval);
+        
+        wispMoveInterval = setInterval(() => {
+            if (!wispElement || wispFollowing) return;
+            if (!owned.has('wisp')) return;
+            
+            const container = roomContainer;
+            const maxX = container.clientWidth - wispElement.offsetWidth - 20;
+            const maxY = container.clientHeight - wispElement.offsetHeight - 20;
+            
+            const randomX = Math.max(20, Math.min(maxX, Math.random() * maxX));
+            const randomY = Math.max(20, Math.min(maxY, Math.random() * maxY));
+            
+            wispElement.style.left = randomX + 'px';
+            wispElement.style.top = randomY + 'px';
+            
+            // Save position
+            const pos = {
+                left: randomX,
+                top: randomY,
+                width: parseInt(wispElement.style.width)
+            };
+            savedPositions['wisp'] = pos;
+            saveToDatabase();
+        }, 8000);
+    }
+    
+    function startWispFollowing() {
+        if (!wispElement || !owned.has('wisp')) return;
+        
+        wispFollowing = true;
+        wispElement.classList.add('following');
+        
+        const onMouseMove = (e) => {
+            if (!wispFollowing) return;
+            const containerRect = roomContainer.getBoundingClientRect();
+            const mouseX = e.clientX - containerRect.left;
+            const mouseY = e.clientY - containerRect.top;
+            
+            const maxX = roomContainer.clientWidth - wispElement.offsetWidth - 10;
+            const maxY = roomContainer.clientHeight - wispElement.offsetHeight - 10;
+            
+            let targetX = Math.max(10, Math.min(maxX, mouseX - 25));
+            let targetY = Math.max(10, Math.min(maxY, mouseY - 25));
+            
+            wispElement.style.left = targetX + 'px';
+            wispElement.style.top = targetY + 'px';
+        };
+        
+        const onMouseLeave = () => {
+            if (wispFollowing) {
+                wispFollowing = false;
+                wispElement.classList.remove('following');
+                document.removeEventListener('mousemove', onMouseMove);
+                roomContainer.removeEventListener('mouseleave', onMouseLeave);
+                startWispRandomMovement();
+                
+                // Save final position
+                const pos = {
+                    left: parseInt(wispElement.style.left),
+                    top: parseInt(wispElement.style.top),
+                    width: parseInt(wispElement.style.width)
+                };
+                savedPositions['wisp'] = pos;
+                saveToDatabase();
+            }
+        };
+        
+        document.addEventListener('mousemove', onMouseMove);
+        roomContainer.addEventListener('mouseleave', onMouseLeave);
+        
+        if (wispMoveInterval) clearInterval(wispMoveInterval);
+    }
+    
+    function renderWisp() {
+        if (!wispLayer) return;
+        
+        wispLayer.innerHTML = '';
+        
+        if (!owned.has('wisp')) return;
+        
+        const pos = savedPositions['wisp'] || { left: 460, top: 240, width: 60 };
+        
+        const wispDiv = document.createElement('div');
+        wispDiv.className = 'wisp-pet';
+        wispDiv.style.left = pos.left + 'px';
+        wispDiv.style.top = pos.top + 'px';
+        wispDiv.style.width = pos.width + 'px';
+        wispDiv.style.height = pos.width + 'px';
+        
+        const img = document.createElement('img');
+        img.src = "{{ asset('images/room/wisp.gif') }}";
+        img.alt = "Blue Wisp";
+        
+        wispDiv.appendChild(img);
+        wispLayer.appendChild(wispDiv);
+        
+        wispElement = wispDiv;
+        
+        // Add click to follow
+        wispDiv.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (wispFollowing) {
+                wispFollowing = false;
+                wispElement.classList.remove('following');
+                document.removeEventListener('mousemove', () => {});
+                startWispRandomMovement();
+            } else {
+                startWispFollowing();
+            }
+        });
+        
+        startWispRandomMovement();
+    }
     
     // Drag and drop
     function makeDraggable(element, itemId) {
@@ -1020,7 +1204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // 🔴 FIXED: Render furniture with proper position loading
+    // Render furniture
     function render() {
         layer.innerHTML = '';
         
@@ -1028,6 +1212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         itemsList.forEach(item => {
             if (!owned.has(item.id)) return;
+            if (item.isPet) return; // Skip wisp, handled separately
             
             let pos = savedPositions[item.id];
             if (!pos || typeof pos !== 'object') {
@@ -1063,7 +1248,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (owned.size === 0) {
             instruction.textContent = 'Your room is empty! Buy furniture from the shop above.';
         } else {
-            instruction.textContent = 'Drag furniture anywhere to arrange your cozy room!';
+            instruction.textContent = 'Drag furniture anywhere to arrange your cozy room! Click on your pet to make it follow your cursor.';
         }
         updateShopItems();
     }
@@ -1075,6 +1260,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const price = parseInt(shopItem.dataset.price);
             const name = shopItem.dataset.name;
             const unlocked = shopItem.dataset.unlocked === 'true';
+            const isPet = shopItem.dataset.isPet === 'true';
             
             if (owned.has(id)) {
                 alert(`✅ You already own the ${name}!`);
@@ -1082,12 +1268,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (!unlocked) {
-                if (id === 'window' || id === 'clock') {
-                    alert(`🔒 ${name} requires a Premium subscription!`);
-                } else if (['bookcase', 'laptop', 'carpet', 'lamp', 'drawer', 'wardrobe'].includes(id)) {
-                    alert(`🔒 ${name} requires Premium + completing the achievement!`);
+                if (id === 'wisp') {
+                    alert(`🔒 ${name} requires Level 3!`);
                 } else {
-                    alert(`❌ ${name} is locked! Complete the requirement first.`);
+                    alert(`🔒 ${name} requires Premium subscription or completing achievements!`);
                 }
                 return;
             }
@@ -1115,7 +1299,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         await saveToDatabase();
                         updateCoinDisplay();
                         render();
-                        alert(`✅ Purchased ${name}! Drag it anywhere to position it.`);
+                        if (isPet) {
+                            renderWisp();
+                        }
+                        alert(`✅ Purchased ${name}! ${isPet ? 'Your new companion will appear in the room!' : 'Drag it anywhere to position it.'}`);
                     } else {
                         alert('❌ Failed to update coins. Please try again.');
                     }

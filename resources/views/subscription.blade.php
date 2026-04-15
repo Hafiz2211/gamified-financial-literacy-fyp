@@ -161,8 +161,6 @@
                     </div>
 
                     <ul style="list-style: none; padding: 0; margin: 24px 0;">
-                        <li style="margin-bottom:12px; display: flex; align-items: center;"><span class="check-mark">✓</span> 1 free tea or coffee every month at partner cafés</li>
-                        <li style="margin-bottom:12px; display: flex; align-items: center;"><span class="check-mark">✓</span> Access to selected gyms and sports hubs</li>
                         <li style="margin-bottom:12px; display: flex; align-items: center;"><span class="check-mark">✓</span> Premium access to lessons and quiz pages</li>
                         <li style="margin-bottom:12px; display: flex; align-items: center;"><span class="check-mark">✓</span> Earn 100 XP from lessons and quiz categories</li>
                         <li style="margin-bottom:12px; display: flex; align-items: center;"><span class="check-mark">✓</span> Exclusive partner deals</li>
@@ -209,8 +207,6 @@
                     </div>
 
                     <ul style="list-style: none; padding: 0; margin: 24px 0;">
-                        <li style="margin-bottom:12px; display: flex; align-items: center;"><span class="check-mark">✓</span> 12 free teas or coffees (1 every month)</li>
-                        <li style="margin-bottom:12px; display: flex; align-items: center;"><span class="check-mark">✓</span> Access to selected gyms and sports hubs</li>
                         <li style="margin-bottom:12px; display: flex; align-items: center;"><span class="check-mark">✓</span> Premium access to lessons and quiz pages</li>
                         <li style="margin-bottom:12px; display: flex; align-items: center;"><span class="check-mark">✓</span> Earn 100 XP from lessons and quiz categories</li>
                         <li style="margin-bottom:12px; display: flex; align-items: center;"><span class="check-mark">✓</span> Exclusive partner deals</li>
@@ -256,6 +252,5 @@
         </div>
     </div>
 </div>
-    @include('partials.music')
 </body>
 </html>

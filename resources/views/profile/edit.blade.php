@@ -147,9 +147,9 @@
                     </div>
                 </div>
 
-                {{-- 4. MUSIC SETTINGS (SIMPLE WORKING CHECKBOX) --}}
+                {{-- 4. MUSIC SETTINGS --}}
                 <div class="rounded-3xl border p-6" style="background:{{ $CARD }}; border-color: rgba(47,93,70,0.16);">
-                    <h2 class="text-xl font-bold mb-4" style="color:{{ $GREEN }};">🎵 Audio Settings</h2>
+                    <h2 class="text-xl font-bold mb-4" style="color:{{ $GREEN }};">🎵 Audio Settings for Achievement and Town</h2>
                     
                     <div class="flex items-center justify-between">
                         <div>
@@ -173,7 +173,25 @@
                     </div>
                 </div>
 
-                {{-- 5. Submit Buttons --}}
+                {{-- 5. 🔴 DELETE ACCOUNT SECTION (MOVED FROM SIDEBAR) --}}
+                <div class="rounded-3xl border p-6" style="background:{{ $CARD }}; border-color: rgba(180,60,60,0.3);">
+                    <h2 class="text-xl font-bold mb-4" style="color: #b43c3c;">⚠️ Danger Zone</h2>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="font-semibold" style="color: #b43c3c;">Delete Account</div>
+                            <p class="text-xs mt-1" style="color: rgba(47,93,70,0.65);">Permanently delete your account and all data. This action cannot be undone.</p>
+                        </div>
+                        
+                        <a href="{{ route('profile.delete') }}" 
+                           class="px-4 py-2 rounded-xl font-semibold transition hover:opacity-90"
+                           style="background: #b43c3c; color: white; text-decoration: none;">
+                            Delete Account
+                        </a>
+                    </div>
+                </div>
+
+                {{-- 6. Submit Buttons --}}
                 <div class="flex gap-4">
                     <button type="submit" 
                             class="px-8 py-3 rounded-xl font-semibold transition hover:opacity-90"
@@ -226,7 +244,5 @@
         }
     });
 </script>
-
-@include('partials.music')
 </body>
 </html>

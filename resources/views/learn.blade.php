@@ -494,7 +494,7 @@
             <section style="margin-top:40px; padding:24px; border-radius:24px; border:1px solid rgba(47,93,70,0.16); background:{{ $CARD }}; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
                 <h3 style="font-size:18px; font-weight:700; color:{{ $GREEN }};">Next step</h3>
                 <p style="margin-top:8px; color:rgba(47,93,70,0.85);">
-                    When you're ready, try the quiz to test your understanding. Quiz levels unlock as your level increases.
+                    When you're ready, try the quiz to test your understanding. 
                 </p>
                 <a href="/quiz"
                    style="display:inline-block; margin-top:16px; padding:12px 24px; border-radius:12px; font-weight:600; background:{{ $GREEN }}; color:{{ $GOLD }}; text-decoration:none;">
@@ -620,6 +620,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
-    @include('partials.music')
 </body>
 </html>
