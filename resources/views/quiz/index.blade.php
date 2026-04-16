@@ -238,7 +238,7 @@
                     </div>
                     <div class="flex gap-2">
                         <span style="color: {{ $GOLD }};">2️⃣</span>
-                        <span>Free quizzes: 90 XP (decreases to 60 XP on retry) while Premium quizzes: 150 XP (decreases to 90 XP on retry)</span>
+                        <span>Free quizzes: 90XP/90🪙 (decreases to 60XP/60🪙 on retry) while Premium quizzes: 150 XP/150🪙 (decreases to 90 XP/90🪙 on retry)</span>
                     </div>
                     <div class="flex gap-2">
                         <span style="color: {{ $GOLD }};">3️⃣</span>
