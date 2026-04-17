@@ -932,7 +932,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/furniture/load');
             const data = await response.json();
             owned = new Set(data.owned || []);
-            savedPositions = data.positions || {};
+            // FIX: Ensure positions is an object, not array
+            if (data.positions && Array.isArray(data.positions)) {
+                savedPositions = {};
+            } else {
+                savedPositions = data.positions || {};
+            }
             render();
             updateShopItems();
             renderWisp();
@@ -963,7 +968,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Save to database
     async function saveToDatabase() {
         try {
-            await fetch('/furniture/save', {
+            const response = await fetch('/furniture/save', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -974,6 +979,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     positions: savedPositions
                 })
             });
+            const result = await response.json();
+            if (result.success) {
+                console.log('✅ Positions saved to database');
+            } else {
+                console.error('Save failed:', result);
+                saveToLocalStorage();
+            }
         } catch (error) {
             console.error('Error saving to database:', error);
             saveToLocalStorage();
