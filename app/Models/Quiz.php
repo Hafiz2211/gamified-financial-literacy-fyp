@@ -11,13 +11,13 @@ class Quiz extends Model
     protected $fillable = [
         'title',
         'description',
-        // 'level_required', // 🔴 Commented out - not needed for pass-based unlocking
+        'level_required', 
         'order',
         'passing_score'
     ];
 
     protected $casts = [
-        // 'level_required' => 'integer', // 🔴 Commented out
+        'level_required' => 'integer', 
         'order' => 'integer',
         'passing_score' => 'integer'
     ];
