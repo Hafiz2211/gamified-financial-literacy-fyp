@@ -96,6 +96,7 @@ Route::middleware(['auth'])->group(function () {
         header('Access-Control-Allow-Methods: GET, OPTIONS');
         header('Access-Control-Allow-Headers: Content-Type');
         header('Access-Control-Allow-Credentials: true');
+        header('Clear-Site-Data: "storage"'); // 🔥 NEW: Tells browser to clear local storage
         
         if ($request->getMethod() === 'OPTIONS') {
             return response('', 200);
@@ -105,11 +106,12 @@ Route::middleware(['auth'])->group(function () {
         return response()->json([
             'user_id' => $user->id,
             'name' => $user->name,
-            'email' => $user->email
+            'email' => $user->email,
+            'force_cloud' => true // 🔥 NEW: Tell Godot to ignore local storage
         ]);
     })->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
     
-    // 🔴 ADDED: Save buildings to database
+    // Save buildings - USES AUTHENTICATED USER ONLY
     Route::post('/api/game/save', function (Request $request) {
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -120,47 +122,69 @@ Route::middleware(['auth'])->group(function () {
             return response('', 200);
         }
         
-        $userId = $request->input('user_id');
-        if (!$userId) {
-            return response()->json(['error' => 'No user_id'], 400);
-        }
+        $user = auth()->user();
         
-        $user = \App\Models\User::find($userId);
         if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
+            return response()->json(['error' => 'Not authenticated'], 401);
         }
         
-        $user->buildings_data = json_encode($request->all());
+        $saveData = $request->all();
+        unset($saveData['user_id']);
+        
+        $user->buildings_data = json_encode($saveData);
         $user->save();
         
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'user_id' => $user->id]);
     })->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
     
-    // 🔴 ADDED: Load buildings from database
+    // Load buildings - FORCES EMPTY DATA to override Godot's local storage
     Route::get('/api/game/load', function (Request $request) {
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, OPTIONS');
         header('Access-Control-Allow-Headers: Content-Type');
         header('Access-Control-Allow-Credentials: true');
+        header('Cache-Control: no-cache, no-store, must-revalidate'); // 🔥 PREVENTS caching
+        header('Pragma: no-cache');
+        header('Expires: 0');
         
         if ($request->getMethod() === 'OPTIONS') {
             return response('', 200);
         }
         
-        $userId = $request->query('user_id');
-        if (!$userId) {
-            return response()->json(['error' => 'No user_id'], 400);
+        $user = auth()->user();
+        
+        if (!$user) {
+            return response()->json(['error' => 'Not authenticated'], 401);
         }
         
-        $user = \App\Models\User::find($userId);
-        if (!$user || !$user->buildings_data) {
-            return response()->json(['buildings' => []]);
+        // 🔥 CRITICAL: Always return fresh data, never cached
+        if (!$user->buildings_data || $user->buildings_data === 'null') {
+            return response()->json([
+                'buildings' => [],
+                'land' => [],
+                'coins' => 0,
+                'population' => 0,
+                'town_level' => 1,
+                'timestamp' => time(),
+                'source' => 'cloud'
+            ]);
         }
         
-        return response()->json(json_decode($user->buildings_data, true));
+        $data = json_decode($user->buildings_data, true);
+        
+        // Remove any user_id from response
+        if (isset($data['user_id'])) {
+            unset($data['user_id']);
+        }
+        
+        // Add timestamp to prevent caching
+        $data['timestamp'] = time();
+        $data['source'] = 'cloud';
+        
+        return response()->json($data);
     })->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
     
-    // Update coins - uses user_id from request
+    // Update coins - USES AUTHENTICATED USER ONLY
     Route::post('/api/game/update', function (Request $request) {
         
         header('Access-Control-Allow-Origin: *');
@@ -172,11 +196,10 @@ Route::middleware(['auth'])->group(function () {
             return response('', 200);
         }
         
-        $userId = $request->input('user_id');
-        if ($userId) {
-            $user = \App\Models\User::find($userId);
-        } else {
-            $user = auth()->user();
+        $user = auth()->user();
+        
+        if (!$user) {
+            return response()->json(['error' => 'Not authenticated'], 401);
         }
         
         if ($request->has('coins')) $user->coins = $request->coins;
@@ -191,11 +214,43 @@ Route::middleware(['auth'])->group(function () {
         return response()->json(['success' => true, 'coins' => $user->coins]);
     })->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
     
-    // Load coins - uses user_id parameter
+    // Load coins - ALWAYS returns database value
     Route::get('/api/game/coins', function (Request $request) {
         
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type');
+        header('Access-Control-Allow-Credentials: true');
+        header('Cache-Control: no-cache, no-store, must-revalidate'); // 🔥 PREVENTS caching
+        
+        if ($request->getMethod() === 'OPTIONS') {
+            return response('', 200);
+        }
+        
+        $user = auth()->user();
+        
+        if (!$user) {
+            return response()->json(['error' => 'Not authenticated'], 401);
+        }
+        
+        // Always return database value, never cache
+        return response()->json([
+            'coins' => (int)$user->coins, // Force integer
+            'level' => $user->level,
+            'townLevel' => $user->town_level ?? 1,
+            'population' => $user->population ?? 0,
+            'wood' => $user->wood ?? 120,
+            'stone' => $user->stone ?? 80,
+            'food' => $user->food ?? 50,
+            'timestamp' => time(),
+            'source' => 'database'
+        ]);
+    })->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+    
+    // FORCE RESET - Clears corrupted game data for current user
+    Route::post('/api/game/reset-my-data', function (Request $request) {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: POST, OPTIONS');
         header('Access-Control-Allow-Headers: Content-Type');
         header('Access-Control-Allow-Credentials: true');
         
@@ -203,21 +258,27 @@ Route::middleware(['auth'])->group(function () {
             return response('', 200);
         }
         
-        $userId = $request->query('user_id');
-        if ($userId) {
-            $user = \App\Models\User::find($userId);
-        } else {
-            $user = auth()->user();
+        $user = auth()->user();
+        
+        if (!$user) {
+            return response()->json(['error' => 'Not authenticated'], 401);
         }
         
+        $user->coins = 0;
+        $user->buildings_data = null;
+        $user->town_level = 1;
+        $user->population = 0;
+        $user->wood = 120;
+        $user->stone = 80;
+        $user->food = 50;
+        $user->save();
+        
         return response()->json([
-            'coins' => $user->coins,
-            'level' => $user->level,
-            'townLevel' => $user->level,
-            'population' => $user->population ?? 0,
-            'wood' => $user->wood ?? 120,
-            'stone' => $user->stone ?? 80,
-            'food' => $user->food ?? 50
+            'success' => true, 
+            'message' => 'Game data reset',
+            'coins' => 0,
+            'buildings' => [],
+            'clear_local_storage' => true // 🔥 Tell Godot to clear its cache
         ]);
     })->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 });
