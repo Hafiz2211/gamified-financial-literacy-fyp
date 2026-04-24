@@ -12,6 +12,19 @@
         flex-direction: column;
     }
     
+    /* Main navigation - grows to push bottom down */
+    .sidebar-nav-main {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+    
+    /* Bottom section - stays at bottom */
+    .sidebar-bottom-section {
+        padding: 1rem;
+        border-top: 1px solid rgba(255,255,255,0.12);
+    }
+    
     /* Mobile styles */
     @media (max-width: 768px) {
         .brusave-sidebar {
@@ -67,6 +80,7 @@
 
 {{-- Sidebar --}}
 <div class="brusave-sidebar" id="mainSidebar">
+    {{-- Logo Section - Always at top --}}
     <div class="p-5 border-b" style="border-color: rgba(255,255,255,0.12);">
         <div class="flex items-center gap-3">
             <img src="{{ asset('images/brusave-logo.png') }}" alt="BruSave logo" class="h-8 w-auto object-contain">
@@ -77,20 +91,42 @@
         </div>
     </div>
 
-    <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
+    {{-- MAIN NAVIGATION LINKS (all except Contact Us) --}}
+    <div class="sidebar-nav-main">
         @foreach ($nav as $item)
-            @php $isActive = $active === $item['key']; @endphp
-            <a href="{{ $item['href'] }}"
-               class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition hover:opacity-95"
-               style="border-color: {{ $isActive ? 'rgba(216,162,74,0.60)' : 'rgba(255,255,255,0.16)' }};
-                      background:  {{ $isActive ? 'rgba(216,162,74,0.14)' : 'rgba(255,255,255,0.04)' }};
-                      color:       {{ $isActive ? $GOLD : 'rgba(255,255,255,0.92)' }};"
-               onclick="closeSidebar()">
-                <span class="text-lg">{{ $item['icon'] }}</span>
-                <span class="font-semibold">{{ $item['label'] }}</span>
-            </a>
+            {{-- Skip Contact Us in main nav --}}
+            @if($item['key'] !== 'contact')
+                @php $isActive = $active === $item['key']; @endphp
+                <a href="{{ $item['href'] }}"
+                   class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition hover:opacity-95 mb-2"
+                   style="border-color: {{ $isActive ? 'rgba(216,162,74,0.60)' : 'rgba(255,255,255,0.16)' }};
+                          background:  {{ $isActive ? 'rgba(216,162,74,0.14)' : 'rgba(255,255,255,0.04)' }};
+                          color:       {{ $isActive ? $GOLD : 'rgba(255,255,255,0.92)' }};"
+                   onclick="closeSidebar()">
+                    <span class="text-lg">{{ $item['icon'] }}</span>
+                    <span class="font-semibold">{{ $item['label'] }}</span>
+                </a>
+            @endif
         @endforeach
-    </nav>
+    </div>
+
+    {{-- BOTTOM SECTION - Contact Us at literal bottom with divider --}}
+    <div class="sidebar-bottom-section">
+        @php
+            $contactItem = collect($nav)->firstWhere('key', 'contact');
+        @endphp
+        @if($contactItem)
+            <a href="{{ $contactItem['href'] }}"
+               class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition hover:opacity-95"
+               style="border-color: {{ $active === 'contact' ? 'rgba(216,162,74,0.60)' : 'rgba(255,255,255,0.16)' }};
+                      background:  {{ $active === 'contact' ? 'rgba(216,162,74,0.14)' : 'rgba(255,255,255,0.04)' }};
+                      color:       {{ $active === 'contact' ? $GOLD : 'rgba(255,255,255,0.92)' }};"
+               onclick="closeSidebar()">
+                <span class="text-lg">{{ $contactItem['icon'] }}</span>
+                <span class="font-semibold">{{ $contactItem['label'] }}</span>
+            </a>
+        @endif
+    </div>
 </div>
 
 <script>

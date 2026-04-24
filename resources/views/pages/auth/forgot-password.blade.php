@@ -54,7 +54,6 @@
                 </h1>
                 <p class="mt-2 text-sm" style="color: rgba(47,93,70,0.78);">
                     Enter your email and we’ll generate a reset link.
-                    (For demo, the link is saved to logs.)
                 </p>
 
                 @if (session('status'))

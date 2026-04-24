@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;  // 👈 ADDED THIS LINE ONLY
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\StatsController;
@@ -29,6 +30,37 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/subscription/success', [SubscriptionController::class, 'success'])->name('subscription.success');
     Route::post('/subscription/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
     
+    Route::get('/contact', function () {
+        return view('contact');
+    })->name('contact');
+
+    // 👇 REPLACED THIS ROUTE ONLY (added email sending)
+    Route::post('/contact', function (Illuminate\Http\Request $request) {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'message' => 'required|string|min:10',
+        ]);
+        
+        // Send email to site owner
+        Mail::send([], [], function ($message) use ($request) {
+            $message->to('brusavesite@gmail.com')
+                    ->subject('New Contact Message from ' . $request->name)
+                    ->replyTo($request->email)
+                    ->html('
+                        <h2>New Contact Message</h2>
+                        <p><strong>Name:</strong> ' . e($request->name) . '</p>
+                        <p><strong>Email:</strong> ' . e($request->email) . '</p>
+                        <p><strong>Message:</strong></p>
+                        <p>' . nl2br(e($request->message)) . '</p>
+                    ');
+        });
+        
+        session()->flash('success', 'Thank you for your message! We\'ll get back to you soon.');
+        return redirect()->route('contact');
+    })->name('contact.submit');
+    // 👆 REPLACED THIS ROUTE ONLY
+
     Route::get('/furniture/load', [App\Http\Controllers\FurnitureController::class, 'load'])->name('furniture.load');
     Route::post('/furniture/save', [App\Http\Controllers\FurnitureController::class, 'save'])->name('furniture.save');
     
@@ -96,7 +128,6 @@ Route::middleware(['auth'])->group(function () {
         header('Access-Control-Allow-Methods: GET, OPTIONS');
         header('Access-Control-Allow-Headers: Content-Type');
         header('Access-Control-Allow-Credentials: true');
-        // 🔥 REMOVED: header('Clear-Site-Data: "storage"'); - This was deleting all saved data!
         
         if ($request->getMethod() === 'OPTIONS') {
             return response('', 200);
@@ -157,7 +188,6 @@ Route::middleware(['auth'])->group(function () {
             return response()->json(['error' => 'Not authenticated'], 401);
         }
         
-        // Return saved buildings or empty array
         if (!$user->buildings_data || $user->buildings_data === 'null') {
             return response()->json([
                 'buildings' => [],
@@ -167,12 +197,10 @@ Route::middleware(['auth'])->group(function () {
         
         $data = json_decode($user->buildings_data, true);
         
-        // Remove any user_id from response
         if (isset($data['user_id'])) {
             unset($data['user_id']);
         }
         
-        // Ensure buildings is always an array
         if (!isset($data['buildings'])) {
             $data['buildings'] = [];
         }
@@ -231,7 +259,6 @@ Route::middleware(['auth'])->group(function () {
             return response()->json(['error' => 'Not authenticated'], 401);
         }
         
-        // Always return database value, never cache
         return response()->json([
             'coins' => (int)$user->coins,
             'level' => $user->level,

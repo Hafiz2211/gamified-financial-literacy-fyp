@@ -59,6 +59,9 @@
             ['key' => 'spending', 'href' => route('spending'), 'icon' => '🧾', 'label' => 'Track Spending'],
             ['key' => 'progress', 'href' => route('progress'), 'icon' => '🏆', 'label' => 'Achievement'],
             ['key' => 'town', 'href' => route('town'), 'icon' => '🏘️', 'label' => 'Town'],
+
+            
+            ['key' => 'contact', 'href' => route('contact'), 'icon' => '📬', 'label' => 'Contact Us'],
         ];
         
         $active = request()->route()->getName();
