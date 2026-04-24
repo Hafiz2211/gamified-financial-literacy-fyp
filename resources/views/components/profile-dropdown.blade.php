@@ -16,7 +16,12 @@
                 </div>
             @endif
         </div>
-        <span class="text-sm font-medium hidden md:inline" style="color: #2F5D46;">{{ $user->name }}</span>
+        <span class="text-sm font-medium hidden md:inline" style="color: #2F5D46;">
+            {{ $user->name }}
+            @if($user->isPremium())
+                <span class="ml-1 text-base">👑</span>
+            @endif
+        </span>
         <svg x-show="!open" class="h-4 w-4" style="color: #D8A24A;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
@@ -39,11 +44,16 @@
         
         {{-- User Info --}}
         <div class="px-4 py-3 border-b" style="border-color: rgba(47,93,70,0.12);">
-            <p class="text-sm font-medium" style="color: #2F5D46;">{{ $user->name }}</p>
+            <p class="text-sm font-medium" style="color: #2F5D46;">
+                {{ $user->name }}
+                @if($user->isPremium())
+                    <span class="ml-1 text-base">👑</span>
+                @endif
+            </p>
             <p class="text-xs truncate" style="color: rgba(47,93,70,0.65);">{{ $user->email }}</p>
         </div>
 
-        {{-- Subscription Link to dedicated page --}}
+        {{-- Subscription Link --}}
         <a href="{{ route('subscription') }}" 
            class="block px-4 py-2 text-sm hover:bg-opacity-80 transition"
            style="color: #2F5D46; hover:background: rgba(216,162,74,0.1);"

@@ -76,6 +76,14 @@
             <div class="rounded-2xl border shadow-lg overflow-hidden"
                  style="background:{{ $CARD }}; border-color: rgba(47,93,70,0.16);">
                 
+                {{-- 🔴 MOBILE WARNING BANNER (Only visible on phones) --}}
+                <div class="block lg:hidden m-4 p-3 rounded-xl text-center" style="background: rgba(216,162,74,0.12); border: 1px solid {{ $GOLD }};">
+                    <p style="color: {{ $GOLD }}; font-size: 12px; margin: 0;">
+                        💡 <strong>Tip:</strong> For the best BruSave experience (Town Builder & Room Decor), use a <strong>laptop or desktop</strong>. 
+                        Mobile version will be implemented in a future update.
+                    </p>
+                </div>
+
                 {{-- Title and Description (top section of the card) --}}
                 <div class="p-8 pb-4 text-center">
                     <h1 class="text-3xl md:text-4xl font-extrabold" style="color:{{ $GREEN }};">

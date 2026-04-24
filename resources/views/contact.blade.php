@@ -150,7 +150,7 @@
                         </div>
                     </div>
 
-                    {{-- Phone Card --}}
+                    {{-- Phone / WhatsApp Card - FIXED LINK --}}
                     <div class="rounded-2xl border p-5 shadow-sm contact-card"
                          style="border-color: rgba(47,93,70,0.16); background: {{ $CARD }};">
                         <div class="flex flex-col items-center text-center">
@@ -159,7 +159,8 @@
                                 📱
                             </div>
                             <div class="text-xs font-semibold tracking-wide uppercase mb-1" style="color: rgba(47,93,70,0.65);">Phone / WhatsApp</div>
-                            <a href="tel:+6737201634" 
+                            <a href="https://wa.me/6737201634" 
+                               target="_blank"
                                class="font-medium hover:underline text-sm" style="color: {{ $GREEN }};">
                                 +673 720 1634
                             </a>

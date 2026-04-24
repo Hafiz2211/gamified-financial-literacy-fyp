@@ -13,8 +13,14 @@ class SubscriptionController extends Controller
         Stripe::setApiKey(config('services.stripe.secret'));
     }
 
-    public function checkoutMonthly()
+    public function checkoutMonthly(Request $request)
     {
+        $request->validate([
+            'accept_terms' => 'accepted'
+        ], [
+            'accept_terms.accepted' => 'You must agree to the Terms & Conditions to subscribe.'
+        ]);
+
         $checkout = Session::create([
             'payment_method_types' => ['card'],
             'line_items' => [[
@@ -34,15 +40,22 @@ class SubscriptionController extends Controller
             'cancel_url' => route('subscription'),
             'metadata' => [
                 'user_id' => auth()->id(),
-                'type' => 'monthly'
+                'type' => 'monthly',
+                'terms_accepted' => 'true'
             ]
         ]);
 
         return redirect($checkout->url);
     }
 
-    public function checkoutYearly()
+    public function checkoutYearly(Request $request)
     {
+        $request->validate([
+            'accept_terms' => 'accepted'
+        ], [
+            'accept_terms.accepted' => 'You must agree to the Terms & Conditions to subscribe.'
+        ]);
+
         $checkout = Session::create([
             'payment_method_types' => ['card'],
             'line_items' => [[
@@ -62,7 +75,8 @@ class SubscriptionController extends Controller
             'cancel_url' => route('subscription'),
             'metadata' => [
                 'user_id' => auth()->id(),
-                'type' => 'yearly'
+                'type' => 'yearly',
+                'terms_accepted' => 'true'
             ]
         ]);
 
@@ -91,7 +105,7 @@ class SubscriptionController extends Controller
         $user->subscription_type = $session->metadata->type;
         $user->save();
 
-        return redirect()->route('subscription')->with('success', '🎉 Welcome to Premium! You now have access to all premium content!');
+        return redirect()->route('subscription')->with('success', '🎉 Welcome to Premium! You now have access to all premium content! 👑');
     }
 
     /**
