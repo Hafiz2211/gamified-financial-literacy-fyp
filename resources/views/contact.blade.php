@@ -65,6 +65,13 @@
             border-color: #D8A24A !important;
             box-shadow: 0 0 0 3px rgba(216,162,74,0.15);
         }
+
+        /* Style for readonly email field */
+        input[readonly] {
+            background-color: #f3f4f6;
+            cursor: default;
+            color: #6b7280;
+        }
     </style>
 </head>
 
@@ -215,11 +222,13 @@
                                 </label>
                                 <input type="email" name="email" required
                                        value="{{ old('email', $user->email ?? '') }}"
+                                       readonly
                                        class="w-full rounded-xl border px-4 py-3 focus:outline-none"
-                                       style="border-color: rgba(47,93,70,0.18); background: white;">
+                                       style="border-color: rgba(47,93,70,0.18); background: #f3f4f6; color: #6b7280; cursor: default;">
                                 @error('email')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
+                                <p class="text-xs mt-1" style="color: rgba(47,93,70,0.55);">Email address is locked and cannot be changed.</p>
                             </div>
 
                             <div>
