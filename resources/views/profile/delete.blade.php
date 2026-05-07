@@ -22,6 +22,7 @@
         ['key'=>'track','label'=>'Track Spending','href'=>'/track-spending','icon'=>'🧾'],
         ['key'=>'progress','label'=>'Achievement','href'=>'/progress','icon'=>'🏆'],
         ['key'=>'town','label'=>'Town','href'=>'/town','icon'=>'🏘️'],
+        ['key'=>'contact','label'=>'Contact Us','href'=>'/contact','icon'=>'📬'],
     ];
 @endphp
 

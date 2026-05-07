@@ -87,6 +87,8 @@ class LessonController extends Controller
         
         // 🔴 KEEP YOUR ORIGINAL LEVEL UPDATE METHOD
         $user->updateLevel();  // Uses your custom thresholds!
+        $user->town_level = $user->level;
+        $user->save();
         
         $user->save();
         

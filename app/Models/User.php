@@ -109,6 +109,7 @@ class User extends Authenticatable
         // Update level if changed
         if ($this->level != $newLevel) {
             $this->level = $newLevel;
+        $this->town_level = $newLevel;
         }
         
         return $this;

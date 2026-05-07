@@ -22,6 +22,7 @@
         ['key'=>'track','label'=>'Track Spending','href'=>'/track-spending','icon'=>'🧾'],
         ['key'=>'progress','label'=>'Achievement','href'=>'/progress','icon'=>'🏆'],
         ['key'=>'town','label'=>'Town','href'=>'/town','icon'=>'🏘️'],
+        ['key'=>'contact','label'=>'Contact Us','href'=>'/contact','icon'=>'📬'],
     ];
 @endphp
 
@@ -107,7 +108,6 @@
                                    disabled
                                    class="w-full rounded-xl border px-4 py-3 bg-gray-50 cursor-not-allowed"
                                    style="border-color: rgba(47,93,70,0.18); background: #f9fafb; color: #6b7280;">
-                            <p class="text-xs mt-1" style="color: rgba(47,93,70,0.55);">Email cannot be changed</p>
                         </div>
                     </div>
                 </div>

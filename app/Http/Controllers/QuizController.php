@@ -182,6 +182,8 @@ class QuizController extends Controller
                 $oldLevel = $user->level;
                 if (method_exists($user, 'updateLevel')) {
                     $user->updateLevel();
+        $user->town_level = $user->level;
+        $user->save();
                 }
                 $user->save();
                 

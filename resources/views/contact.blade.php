@@ -228,7 +228,6 @@
                                 @error('email')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
-                                <p class="text-xs mt-1" style="color: rgba(47,93,70,0.55);">Email address is locked and cannot be changed.</p>
                             </div>
 
                             <div>

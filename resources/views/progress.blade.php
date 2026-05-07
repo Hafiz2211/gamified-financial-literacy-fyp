@@ -411,11 +411,12 @@
         ['key'=>'track','label'=>'Track Spending','href'=>'/track-spending','icon'=>'🧾'],
         ['key'=>'progress','label'=>'Achievement','href'=>'/progress','icon'=>'🏆'],
         ['key'=>'town','label'=>'Town','href'=>'/town','icon'=>'🏘️'],
+        ['key'=>'contact','label'=>'Contact Us','href'=>'/contact','icon'=>'📬'],
     ];
 
     // Get REAL user data from database
     $userName = $user->name ?? 'Hafiz';
-    $level = $user->level ?? 1;
+    $level = $user->town_level ?? 1;
     $coins = $user->coins ?? 0;
     $xp = $user->xp ?? 0;
     

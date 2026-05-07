@@ -89,6 +89,9 @@ class TransactionController extends Controller
         // Update user totals
         $user->xp += $xpReward;
         $user->coins += $coinReward;
+        $user->updateLevel();
+        $user->town_level = $user->level;
+        $user->save();
         $user->save();
 
         // Flash notification if leveled up

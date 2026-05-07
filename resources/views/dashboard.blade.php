@@ -105,7 +105,7 @@
         ->sum('amount');
 
     // 🔴 KEEP YOUR ORIGINAL THRESHOLDS (matches User.php)
-    $currentLevel = $user->level ?? 1;
+    $currentLevel = $user->town_level ?? 1;
     $currentXP = $user->xp ?? 0;
 
     $levelThresholds = [
@@ -164,6 +164,8 @@
         ['key'=>'track','label'=>'Track Spending','href'=>'/track-spending','icon'=>'🧾'],
         ['key'=>'progress','label'=>'Achievement','href'=>'/progress','icon'=>'🏆'],
         ['key'=>'town','label'=>'Town','href'=>'/town','icon'=>'🏘️'],
+        ['key'=>'contact','label'=>'Contact Us','href'=>'/contact','icon'=>'📬'],
+        ['key'=>'contact','label'=>'Contact Us','href'=>'/contact','icon'=>'📬'],
     ];
 @endphp
 
